@@ -3,6 +3,7 @@ package com.lordstark.java2d.Game;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.lordstark.java2d.AppConfig;
 import javafx.animation.KeyFrame;
 import javafx.animation.*;
 import javafx.application.Application;
@@ -17,8 +18,6 @@ import javafx.util.Duration;
 
 public class Game extends Application {
 
-    private static final int HEIGHT = 600;
-    private static final int WIDTH = 800;
     private static final double SPEED = 4;
     private Player player;
     private Map<KeyCode, Boolean> keys = new HashMap<>();
@@ -31,12 +30,14 @@ public class Game extends Application {
         stage.setTitle("Simple shooter game");
 
         StackPane pane = new StackPane();
-        Canvas canvas = new Canvas(WIDTH, HEIGHT);
+
+        // Get width and height from AppConfig
+        Canvas canvas = new Canvas(AppConfig.getWidth(), AppConfig.getHeight());
         canvas.setFocusTraversable(true);
         GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
         pane.getChildren().add(canvas);
 
-        this.player = new Player(50,50);
+        this.player = new Player(50, 50);
 
         Timeline loop = new Timeline(new KeyFrame(Duration.millis(1000.0/60),
                                                   e -> update(graphicsContext)));
@@ -46,14 +47,14 @@ public class Game extends Application {
         canvas.setOnKeyPressed(e -> this.keys.put(e.getCode(), true));
         canvas.setOnKeyReleased(e -> this.keys.put(e.getCode(), false));
 
-        Scene scene = new Scene(pane, WIDTH, HEIGHT);
+        Scene scene = new Scene(pane, AppConfig.getWidth(), AppConfig.getHeight());
         stage.setScene(scene);
         stage.show();
     }
     private void update(GraphicsContext graphicsContext) {
-        graphicsContext.clearRect(0, 0, WIDTH, HEIGHT);
+        graphicsContext.clearRect(0, 0, AppConfig.getWidth(), AppConfig.getHeight());
         graphicsContext.setFill(Color.LIME);
-        graphicsContext.fillRect(0, 0, WIDTH, HEIGHT);
+        graphicsContext.fillRect(0, 0, AppConfig.getWidth(), AppConfig.getHeight());
         this.player.render(graphicsContext);
 
         if (this.keys.getOrDefault(KeyCode.W, false)){

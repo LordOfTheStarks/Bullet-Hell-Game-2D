@@ -1,5 +1,6 @@
 package com.lordstark.java2d.Menu;
 
+import com.lordstark.java2d.AppConfig;
 import com.lordstark.java2d.Game.Game;
 import javafx.animation.*;
 import javafx.application.Application;
@@ -10,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -26,9 +28,6 @@ import java.util.List;
 
 public class MainMenu extends Application {
 
-    private static final int WIDTH = 1280;
-    private static final int HEIGHT = 720;
-
     private List<Pair<String, Runnable>> menuData = Arrays.asList(
             new Pair<String, Runnable>("Play", this::startGame),
             new Pair<String, Runnable>("Settings", this::openSettings),
@@ -43,8 +42,8 @@ public class MainMenu extends Application {
         addBackground();
         addTitle();
 
-        double linex = WIDTH / 2 - 100;
-        double liney = HEIGHT / 3 + 50;
+        double linex = AppConfig.getWidth() / 2 - 100;
+        double liney = AppConfig.getWidth() / 3 + 50;
 
         addLine(linex, liney);
         addMenu(linex + 5, liney + 5);
@@ -55,15 +54,15 @@ public class MainMenu extends Application {
 
     private void addBackground() {
         ImageView imageView = new ImageView(new Image(getClass().getResource("/prengu.png").toExternalForm()));
-        imageView.setFitWidth(WIDTH);
-        imageView.setFitHeight(HEIGHT);
+        imageView.setFitWidth(AppConfig.getWidth());
+        imageView.setFitHeight(AppConfig.getHeight());
 
         root.getChildren().add(imageView);
     }
     private void addTitle() {
         MenuTitle title = new MenuTitle("Bullet Hell");
-        title.setTranslateX(WIDTH / 2 - title.getTitleWidth() / 2);
-        title.setTranslateY(HEIGHT / 3);
+        title.setTranslateX(AppConfig.getWidth() / 2 - title.getTitleWidth() / 2);
+        title.setTranslateY(AppConfig.getHeight() / 4);
 
         root.getChildren().add(title);
     }
@@ -93,8 +92,8 @@ public class MainMenu extends Application {
         st.play();
     }
     private void addMenu(double x, double y) {
-        menuBox.setTranslateX(x);
-        menuBox.setTranslateY(y);
+        menuBox.setTranslateX(AppConfig.getWidth() / 2 - 100);
+        menuBox.setTranslateY(AppConfig.getHeight() / 2 - menuBox.getChildren().size() * 20);
         menuData.forEach(data -> {
             MenuItem item = new MenuItem(data.getKey());
             item.setOnAction(data.getValue());
@@ -136,14 +135,52 @@ public class MainMenu extends Application {
         VBox settingsRoot = new VBox(10);
         settingsRoot.setAlignment(Pos.CENTER);
 
+        settingsRoot.setStyle("-fx-background-color: rgba(0, 0, 0, 0.5);");
+
         ComboBox<String> resolutionDropdown = new ComboBox<>();
-        resolutionDropdown.getItems().addAll("1280x720", "1920x1080");
+        resolutionDropdown.getItems().addAll(
+                                "800x600",
+                                    "1024x768",
+                                    "1280x720",
+                                    "1366x768",
+                                    "1600x900",
+                                    "1920x1080"
+        );
+        resolutionDropdown.setStyle("-fx-background-color: #000; -fx-text-fill: #fff; -fx-font-size: 14px;");
+
+        String currentResolution = AppConfig.getWidth() + "x" + AppConfig.getHeight();
+        resolutionDropdown.setValue(currentResolution);
+
         Button saveButton = new Button("Save");
-        saveButton.setOnAction(e -> settingsStage.close());
+        saveButton.setStyle("-fx-background-color: #000; -fx-text-fill: #fff; -fx-font-size: 14px;");
+
+        saveButton.setOnAction(e -> {
+            String selectedResolution = resolutionDropdown.getValue();
+            String[] dimensions = selectedResolution.split("x");
+            int width = Integer.parseInt(dimensions[0]);
+            int height = Integer.parseInt(dimensions[1]);
+
+            AppConfig.setWidth(width);
+            AppConfig.setHeight(height);
+
+            Stage stage = (Stage) root.getScene().getWindow();
+            stage.setWidth(width);
+            stage.setHeight(height);
+
+            root.getChildren().clear();
+            menuBox.getChildren().clear();
+
+            root.getChildren().add(createContent());
+
+            settingsStage.close();
+        });
+
+        saveButton.setEffect(new DropShadow(10, Color.BLACK));
+        resolutionDropdown.setEffect(new DropShadow(10, Color.BLACK));
 
         settingsRoot.getChildren().addAll(resolutionDropdown, saveButton);
 
-        Scene settingsScene = new Scene(settingsRoot, 300, 200);
+        Scene settingsScene = new Scene(settingsRoot, 400, 250);
         settingsStage.setTitle("Settings");
         settingsStage.setScene(settingsScene);
         settingsStage.show();
