@@ -1,4 +1,4 @@
-package com.lordstark.java2d;
+package com.lordstark.java2d.Game;
 
 import java.util.HashMap;
 import java.util.Map;

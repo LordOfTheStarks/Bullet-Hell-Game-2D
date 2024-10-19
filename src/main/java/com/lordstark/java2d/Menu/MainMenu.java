@@ -1,5 +1,6 @@
-package com.lordstark.java2d;
+package com.lordstark.java2d.Menu;
 
+import com.lordstark.java2d.Game.Game;
 import javafx.animation.*;
 import javafx.application.Application;
 import javafx.geometry.Pos;

@@ -1,4 +1,4 @@
-package com.lordstark.java2d;
+package com.lordstark.java2d.Menu;
 
 import javafx.beans.binding.Bindings;
 import javafx.scene.effect.BoxBlur;
