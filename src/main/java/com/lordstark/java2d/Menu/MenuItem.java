@@ -15,7 +15,7 @@ public class MenuItem extends Pane {
     private Text text;
 
     private Effect shadow = new DropShadow(5, Color.BLACK);
-    private Effect blur = new BoxBlur(1, 1, 2);
+    private Effect blur = new BoxBlur(1, 1, 1);
 
     public MenuItem(String name) {
         Polygon bg = new Polygon(
@@ -25,7 +25,7 @@ public class MenuItem extends Pane {
                 200,30,
                 0,30
         );
-        bg.setStroke(Color.color(1, 1, 1, 0.75));
+        bg.setStroke(Color.color(1, 1, 1, 1));
         bg.setEffect(new GaussianBlur());
 
         bg.fillProperty().bind(
