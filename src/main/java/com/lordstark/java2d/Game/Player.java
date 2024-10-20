@@ -14,6 +14,13 @@ public class Player {
         this.x = x;
         this.y = y;
     }
+
+    public double getX() {
+        return this.x;
+    }
+    public double getY() {
+        return this.y;
+    }
     public void render(GraphicsContext graphicsContext) {
         graphicsContext.setFill(Color.RED);
         graphicsContext.fillOval(this.x, this.y, WIDTH, WIDTH);

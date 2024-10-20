@@ -1,7 +1,6 @@
 package com.lordstark.java2d.Game;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import com.lordstark.java2d.AppConfig;
 import javafx.animation.KeyFrame;
@@ -21,6 +20,7 @@ public class Game extends Application {
     private static final double SPEED = 4;
     private Player player;
     private Map<KeyCode, Boolean> keys = new HashMap<>();
+    private List<Enemy> enemies = new ArrayList<>();
 
     public static void main(String[] args) {
         launch(args);
@@ -69,8 +69,12 @@ public class Game extends Application {
     public void spawnEnemies() {
         Thread spawner = new Thread(() -> {
             try {
+                Random random = new Random();
                 while (true) {
-                    Thread.sleep(1000);
+                    double x = random.nextDouble()*AppConfig.getWidth();
+                    double y = random.nextDouble()*AppConfig.getHeight();
+                    this.enemies.add(new Enemy(this.player, x, y));
+                    Thread.sleep(5000);
                 }
             }catch (InterruptedException ex) {
                 ex.printStackTrace();
@@ -83,6 +87,11 @@ public class Game extends Application {
         graphicsContext.setFill(Color.LIME);
         graphicsContext.fillRect(0, 0, AppConfig.getWidth(), AppConfig.getHeight());
         this.player.render(graphicsContext);
+
+        for(int i = 0; i < this.enemies.size(); i++) {
+            Enemy e = this.enemies.get(i);
+            e.render(graphicsContext);
+        }
 
         if (this.keys.getOrDefault(KeyCode.W, false)){
             this.player.move(0, -SPEED);
