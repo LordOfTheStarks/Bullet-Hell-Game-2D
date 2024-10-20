@@ -45,7 +45,6 @@ public class MainMenu extends Application {
         double linex = AppConfig.getWidth() / 2 - 100;
         double liney = AppConfig.getWidth() / 3 + 50;
 
-        addLine(linex, liney);
         addMenu(linex + 5, liney + 5);
 
         startAnimation();
@@ -67,15 +66,6 @@ public class MainMenu extends Application {
         title.setTranslateY(AppConfig.getHeight() / 3);
 
         root.getChildren().add(title);
-    }
-    private void addLine(double x, double y) {
-        line = new Line(x, y, x, y + 120);
-        line.setStrokeWidth(3);
-        line.setStroke(Color.color(1, 1, 1, 0.75));
-        line.setEffect(new DropShadow(5, Color.BLACK));
-        line.setScaleY(0);
-
-        root.getChildren().add(line);
     }
     private void startAnimation() {
         ScaleTransition st = new ScaleTransition(Duration.seconds(1), line);

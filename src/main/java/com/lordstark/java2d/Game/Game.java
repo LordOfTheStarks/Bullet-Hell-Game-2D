@@ -44,12 +44,39 @@ public class Game extends Application {
         loop.setCycleCount(Animation.INDEFINITE);
         loop.play();
 
+        spawnEnemies();
+
         canvas.setOnKeyPressed(e -> this.keys.put(e.getCode(), true));
         canvas.setOnKeyReleased(e -> this.keys.put(e.getCode(), false));
+        canvas.setOnMousePressed(e -> this.player.shoot(e.getX(), e.getY()));
+        canvas.setOnMouseDragged(e -> this.player.shoot(e.getX(), e.getY()));
 
         Scene scene = new Scene(pane, AppConfig.getWidth(), AppConfig.getHeight());
         stage.setScene(scene);
         stage.show();
+    }
+    public static void timerBullet(long time, Runnable r) {
+        new Thread(() -> {
+            try {
+                Thread.sleep(time);
+                r.run();
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        }).start();
+    }
+
+    public void spawnEnemies() {
+        Thread spawner = new Thread(() -> {
+            try {
+                while (true) {
+                    Thread.sleep(1000);
+                }
+            }catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        });
+        spawner.start();
     }
     private void update(GraphicsContext graphicsContext) {
         graphicsContext.clearRect(0, 0, AppConfig.getWidth(), AppConfig.getHeight());
