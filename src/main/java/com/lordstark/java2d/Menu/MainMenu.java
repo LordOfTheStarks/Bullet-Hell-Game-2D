@@ -49,11 +49,13 @@ public class MainMenu extends Application {
         addMenu(linex + 5, liney + 5);
 
         startAnimation();
+
         return root;
     }
 
     private void addBackground() {
-        ImageView imageView = new ImageView(new Image(getClass().getResource("/prengu.png").toExternalForm()));
+        ImageView imageView = new ImageView(
+                new Image(getClass().getResource("/5d9ce6c826eac1ebec3d8b65536d3ae1.jpg").toExternalForm()));
         imageView.setFitWidth(AppConfig.getWidth());
         imageView.setFitHeight(AppConfig.getHeight());
 
@@ -62,7 +64,7 @@ public class MainMenu extends Application {
     private void addTitle() {
         MenuTitle title = new MenuTitle("Bullet Hell");
         title.setTranslateX(AppConfig.getWidth() / 2 - title.getTitleWidth() / 2);
-        title.setTranslateY(AppConfig.getHeight() / 4);
+        title.setTranslateY(AppConfig.getHeight() / 3);
 
         root.getChildren().add(title);
     }
@@ -93,7 +95,7 @@ public class MainMenu extends Application {
     }
     private void addMenu(double x, double y) {
         menuBox.setTranslateX(AppConfig.getWidth() / 2 - 100);
-        menuBox.setTranslateY(AppConfig.getHeight() / 2 - menuBox.getChildren().size() * 20);
+        menuBox.setTranslateY(AppConfig.getHeight() / 2);
         menuData.forEach(data -> {
             MenuItem item = new MenuItem(data.getKey());
             item.setOnAction(data.getValue());
