@@ -6,9 +6,10 @@ import java.util.*;
 
 public class Player {
     private double x, y;
-    private List<Bullet> bullets = new ArrayList<>();
+    public static List<Bullet> bullets = new ArrayList<>();
     private static final double WIDTH = 50;
-    private boolean shooting = false;
+    private boolean shooting = false, damage = false;
+    private int hp = 100;
 
     public Player(double x, double y) {
         this.x = x;
@@ -20,6 +21,15 @@ public class Player {
     }
     public double getY() {
         return this.y;
+    }
+    public int getHp() {
+        return this.hp;
+    }
+    public void takeDamage(int dmg) {
+        if(damage) return;
+        this.hp -= dmg;
+        damage = true;
+        Game.timerBullet(150, () -> damage = false);
     }
     public void render(GraphicsContext graphicsContext) {
         graphicsContext.setFill(Color.RED);
