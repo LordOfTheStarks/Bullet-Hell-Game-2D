@@ -24,9 +24,9 @@ public class Wall {
     public double getHeight() {
         return height;
     }
-    public void render(GraphicsContext gc) {
+    public void render(GraphicsContext gc, Camera camera) {
         gc.setFill(Color.DARKGRAY);
-        gc.fillRect(x,y,width,height);
+        gc.fillRect(x - camera.getOffsetX(), y - camera.getOffsetY(), width, height);
     }
     public boolean collides(double px, double py, double pWidth, double pHeight) {
         return px < x + width && px + pWidth > x && py < y + height && py + pHeight > y;

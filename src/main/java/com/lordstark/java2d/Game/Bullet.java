@@ -20,11 +20,19 @@ public class Bullet {
     public double getY() {
         return this.y;
     }
-    public void render(GraphicsContext graphicsContext) {
+    public void render(GraphicsContext graphicsContext, Camera camera) {
         graphicsContext.setFill(Color.GRAY);
-        graphicsContext.fillOval(this.x, this.y, WIDTH, WIDTH);
+        graphicsContext.fillOval(this.x - camera.getOffsetX(),
+                                 this.y - camera.getOffsetY(), WIDTH, WIDTH);
 
         this.x += Math.cos(this.angle)*SPEED;
         this.y += Math.sin(this.angle)*SPEED;
+
+        for (Wall wall : Game.getWalls()) {
+            if(wall.collides(this.x, this.y, WIDTH, WIDTH)) {
+                Player.bullets.remove(this);
+                return;
+            }
+        }
     }
 }

@@ -106,7 +106,7 @@ public class Game extends Application {
 
         for(int i = 0; i < enemies.size(); i++) {
             Enemy e = enemies.get(i);
-            e.render(graphicsContext);
+            e.render(graphicsContext, camera);
             for(int j = 0; j < Player.bullets.size(); j++) {
                 if(e.collides(Player.bullets.get(j).getX(), Player.bullets.get(j).getY(),
                               Enemy.WIDTH, Bullet.WIDTH)) {
@@ -118,7 +118,7 @@ public class Game extends Application {
                 }
             }
         }
-        this.player.render(graphicsContext);
+        this.player.render(graphicsContext, camera);
 
         if (this.keys.getOrDefault(KeyCode.W, false)){
             this.player.move(0, -SPEED);
@@ -140,7 +140,7 @@ public class Game extends Application {
 
         //Draws WALLS
         for(Wall wall : walls) {
-            wall.render(graphicsContext);
+            wall.render(graphicsContext, camera);
         }
 
         //Display SCORE

@@ -31,12 +31,13 @@ public class Player {
         damage = true;
         Game.timerBullet(150, () -> damage = false);
     }
-    public void render(GraphicsContext graphicsContext) {
+    public void render(GraphicsContext graphicsContext, Camera camera) {
         graphicsContext.setFill(Color.RED);
-        graphicsContext.fillOval(this.x, this.y, WIDTH, WIDTH);
+        graphicsContext.fillOval(this.x - camera.getOffsetX(),
+                                 this.y - camera.getOffsetY(), WIDTH, WIDTH);
 
         for (int i = 0; i < this.bullets.size(); i++) {
-            this.bullets.get(i).render(graphicsContext);
+            this.bullets.get(i).render(graphicsContext, camera);
         }
     }
     public void move(double dx, double dy) {

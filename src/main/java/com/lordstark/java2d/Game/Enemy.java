@@ -25,9 +25,10 @@ public class Enemy {
     public boolean collides(double x, double y, double w1, double w2) {
         return Math.sqrt(Math.pow(this.x+w1/2-x-w2/2, 2)+Math.pow(this.y+w1/2-y-w2/2, 2)) <= w1/2+w2/2;
     }
-    public void render(GraphicsContext graphicsContext) {
+    public void render(GraphicsContext graphicsContext, Camera camera) {
         graphicsContext.setFill(Color.BLUE);
-        graphicsContext.fillOval(x, y, WIDTH, WIDTH);
+        graphicsContext.fillOval(x - camera.getOffsetX(),
+                                 y - camera.getOffsetY(), WIDTH, WIDTH);
 
         // Calculate angle to move toward the player
         double angle = Math.atan2(player.getY() - y, player.getX() - x);

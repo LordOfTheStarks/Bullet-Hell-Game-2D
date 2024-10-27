@@ -3,24 +3,24 @@ package com.lordstark.java2d.Game;
 import com.lordstark.java2d.AppConfig;
 
 public class Camera {
-    private double x, y;
+    private double offsetX, offsetY;
 
-    public Camera(double x, double y) {
-        this.x = x;
-        this.y = y;
+    public Camera(double offsetX, double offsetY) {
+        this.offsetX = offsetX;
+        this.offsetY = offsetY;
     }
 
-    public double getX() {
-        return x;
-    }
-
-    public double getY() {
-        return y;
-    }
-
+    // Updates camera position to center on the player
     public void update(Player player) {
-        // Center camera based on player's position
-        this.x = player.getX() - AppConfig.getWidth() / 2;
-        this.y = player.getY() - AppConfig.getHeight() / 2;
+        this.offsetX = player.getX() - AppConfig.getWidth() / 2;
+        this.offsetY = player.getY() - AppConfig.getHeight() / 2;
+    }
+
+    public double getOffsetX() {
+        return offsetX;
+    }
+
+    public double getOffsetY() {
+        return offsetY;
     }
 }
