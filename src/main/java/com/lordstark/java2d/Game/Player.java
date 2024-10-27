@@ -55,12 +55,16 @@ public class Player {
         this.x += dx;
         this.y += dy;
     }
-    public void shoot(double x, double y) {
+    public void shoot(double mouseX, double mouseY) {
         if (shooting) return;
         shooting = true;
         Game.timerBullet(150, () -> this.shooting = false);
-        double angle = Math.atan2(y-this.y, x-this.x);
-        Bullet b = new Bullet(angle, this.x+WIDTH/2, this.y+WIDTH/2);
-        this.bullets.add(b);
+
+        double worldMouseX = mouseX + Game.camera.getOffsetX();
+        double worldMouseY = mouseY + Game.camera.getOffsetY();
+
+        double angle = Math.atan2(worldMouseY-this.y, worldMouseX-this.x);
+        Bullet bullet = new Bullet(angle, this.x+WIDTH/2, this.y+WIDTH/2);
+        this.bullets.add(bullet);
     }
 }
