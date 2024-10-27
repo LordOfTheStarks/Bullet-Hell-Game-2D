@@ -17,19 +17,28 @@ import javafx.util.Duration;
 
 public class Game extends Application {
 
+    public static Camera camera;
     private static final double SPEED = 10;
     private Player player;
     private Map<KeyCode, Boolean> keys = new HashMap<>();
     public static List<Enemy> enemies = new ArrayList<>();
+    private static List<Wall> walls = new ArrayList<>();
+    private int score = 0;
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public static List<Wall> getWalls() {
+        return walls;
     }
     @Override
     public void start(Stage stage) {
         stage.setTitle("Simple shooter game");
 
         StackPane pane = new StackPane();
+
+        camera = new Camera(0, 0);
 
         // Get width and height from AppConfig
         Canvas canvas = new Canvas(AppConfig.getWidth(), AppConfig.getHeight());
@@ -46,6 +55,8 @@ public class Game extends Application {
 
         spawnEnemies();
 
+        initializeWalls();
+
         canvas.setOnKeyPressed(e -> this.keys.put(e.getCode(), true));
         canvas.setOnKeyReleased(e -> this.keys.put(e.getCode(), false));
         canvas.setOnMousePressed(e -> this.player.shoot(e.getX(), e.getY()));
@@ -54,6 +65,10 @@ public class Game extends Application {
         Scene scene = new Scene(pane, AppConfig.getWidth(), AppConfig.getHeight());
         stage.setScene(scene);
         stage.show();
+    }
+    private void initializeWalls() {
+        walls.add(new Wall(200, 150, 100, 20));
+        walls.add(new Wall(400,300, 150, 20));
     }
     public static void timerBullet(long time, Runnable r) {
         new Thread(() -> {
@@ -83,6 +98,8 @@ public class Game extends Application {
         spawner.start();
     }
     private void update(GraphicsContext graphicsContext) {
+        camera.update(player);
+
         graphicsContext.clearRect(0, 0, AppConfig.getWidth(), AppConfig.getHeight());
         graphicsContext.setFill(Color.LIME);
         graphicsContext.fillRect(0, 0, AppConfig.getWidth(), AppConfig.getHeight());
@@ -96,6 +113,7 @@ public class Game extends Application {
                     Player.bullets.remove(j);
                     enemies.remove(i);
                     i++;
+                    score += 10;
                     break;
                 }
             }
@@ -119,5 +137,14 @@ public class Game extends Application {
         graphicsContext.fillRect(50, AppConfig.getHeight()-80, 100*(this.player.getHp()/100.0), 30);
         graphicsContext.setStroke(Color.BLACK);
         graphicsContext.strokeRect(50, AppConfig.getHeight()-80, 100, 30);
+
+        //Draws WALLS
+        for(Wall wall : walls) {
+            wall.render(graphicsContext);
+        }
+
+        //Display SCORE
+        graphicsContext.setFill(Color.BLACK);
+        graphicsContext.fillText("Score: " + score, 10, 20);
     }
 }

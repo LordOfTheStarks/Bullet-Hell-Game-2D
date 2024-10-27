@@ -39,9 +39,20 @@ public class Player {
             this.bullets.get(i).render(graphicsContext);
         }
     }
-    public void move(double x, double y) {
-        this.x += x;
-        this.y += y;
+    public void move(double dx, double dy) {
+        double newX = x + dx;
+        double newY = y + dy;
+
+        for (Wall wall : Game.getWalls()) {
+            if (wall.collides(newX, y, WIDTH, WIDTH)) {
+                dx = 0;
+            }
+            if (wall.collides(x, newY, WIDTH, WIDTH)) {
+                dy = 0;
+            }
+        }
+        this.x += dx;
+        this.y += dy;
     }
     public void shoot(double x, double y) {
         if (shooting) return;
