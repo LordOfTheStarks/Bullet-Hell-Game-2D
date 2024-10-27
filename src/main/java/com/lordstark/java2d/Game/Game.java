@@ -57,7 +57,12 @@ public class Game extends Application {
 
         initializeWalls();
 
-        canvas.setOnKeyPressed(e -> this.keys.put(e.getCode(), true));
+        canvas.setOnKeyPressed(e -> {
+            this.keys.put(e.getCode(), true);
+            if (e.getCode() == KeyCode.ESCAPE) {
+                System.exit(0);
+            }
+        });
         canvas.setOnKeyReleased(e -> this.keys.put(e.getCode(), false));
         canvas.setOnMousePressed(e -> this.player.shoot(e.getX(), e.getY()));
         canvas.setOnMouseDragged(e -> this.player.shoot(e.getX(), e.getY()));
