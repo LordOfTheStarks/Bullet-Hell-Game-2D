@@ -26,6 +26,7 @@ public class Game extends Application {
     private static List<Wall> walls = new ArrayList<>();
     private int score = 0;
     private Image tileImage;
+    private TerrainManager terrainManager;
 
     public static void main(String[] args) {
         launch(args);
@@ -36,6 +37,8 @@ public class Game extends Application {
     }
     @Override
     public void start(Stage stage) {
+
+        terrainManager = new TerrainManager();
 
         tileImage = new Image("file:src/main/resources/tiles/FieldsTile_01.png");
 
@@ -118,6 +121,8 @@ public class Game extends Application {
                                           y - camera.getOffsetY() % tileHeight);
             }
         }
+
+        terrainManager.render(graphicsContext, camera);
 
         for(int i = 0; i < enemies.size(); i++) {
             Enemy e = enemies.get(i);
