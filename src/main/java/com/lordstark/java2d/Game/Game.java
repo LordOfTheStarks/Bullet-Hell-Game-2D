@@ -37,7 +37,7 @@ public class Game extends Application {
     @Override
     public void start(Stage stage) {
 
-        tileImage = new Image("file:src/main/resources/FieldsTile_01.png");
+        tileImage = new Image("file:src/main/resources/tiles/FieldsTile_01.png");
 
         stage.setTitle("Simple shooter game");
 
