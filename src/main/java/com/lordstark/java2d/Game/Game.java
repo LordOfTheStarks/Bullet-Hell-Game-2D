@@ -39,7 +39,7 @@ public class Game extends Application {
 
         tileImage = new Image("file:src/main/resources/tiles/FieldsTile_01.png");
 
-        stage.setTitle("Simple shooter game");
+        stage.setTitle("Shooter game");
 
         StackPane pane = new StackPane();
 
