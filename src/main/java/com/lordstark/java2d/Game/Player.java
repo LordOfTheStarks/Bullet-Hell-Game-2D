@@ -25,7 +25,7 @@ public class Player {
         this.x = x;
         this.y = y;
         this.spriteSheet = new Image("file:src/main/resources/Player_Side_Sheet.png");
-        this.spriteAnimation = new SpriteAnimation(spriteSheet, 48, 44, 60); // Set frame width/height based on sprite dimensions
+        this.spriteAnimation = new SpriteAnimation(spriteSheet, 48, 44, 30); // Set frame width/height based on sprite dimensions
         setIdleAnimation(); // Start with idle animation
     }
 

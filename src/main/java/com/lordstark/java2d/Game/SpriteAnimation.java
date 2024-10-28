@@ -34,7 +34,7 @@ public class SpriteAnimation {
             frames[i] = new WritableImage(reader, x, y, frameWidth, frameHeight);
         }
 
-        currentFrameIndex = 0; // Reset frame index when switching animations
+        currentFrameIndex = 0; // Reset frame index when switching animation
     }
 
     public Image getFrame() {

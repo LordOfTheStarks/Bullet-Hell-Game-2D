@@ -19,7 +19,7 @@ import javafx.util.Duration;
 public class Game extends Application {
 
     public static Camera camera;
-    private static final double SPEED = 5;
+    private static final double SPEED = 8;
     private Player player;
     private Map<KeyCode, Boolean> keys = new HashMap<>();
     public static List<Enemy> enemies = new ArrayList<>();
