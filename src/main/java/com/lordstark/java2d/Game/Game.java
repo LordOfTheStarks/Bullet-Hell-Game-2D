@@ -9,6 +9,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -24,6 +25,7 @@ public class Game extends Application {
     public static List<Enemy> enemies = new ArrayList<>();
     private static List<Wall> walls = new ArrayList<>();
     private int score = 0;
+    private Image tileImage;
 
     public static void main(String[] args) {
         launch(args);
@@ -34,6 +36,9 @@ public class Game extends Application {
     }
     @Override
     public void start(Stage stage) {
+
+        tileImage = new Image("file:src/main/resources/FieldsTile_01.png");
+
         stage.setTitle("Simple shooter game");
 
         StackPane pane = new StackPane();
@@ -105,9 +110,14 @@ public class Game extends Application {
     private void update(GraphicsContext graphicsContext) {
         camera.update(player);
 
-        graphicsContext.clearRect(0, 0, AppConfig.getWidth(), AppConfig.getHeight());
-        graphicsContext.setFill(Color.LIME);
-        graphicsContext.fillRect(0, 0, AppConfig.getWidth(), AppConfig.getHeight());
+        double tileWidth = tileImage.getWidth();
+        double tileHeight = tileImage.getHeight();
+        for (int x = 0; x < AppConfig.getWidth(); x += tileWidth) {
+            for (int y = 0; y < AppConfig.getHeight(); y += tileHeight) {
+                graphicsContext.drawImage(tileImage, x - camera.getOffsetX() % tileWidth,
+                                          y - camera.getOffsetY() % tileHeight);
+            }
+        }
 
         for(int i = 0; i < enemies.size(); i++) {
             Enemy e = enemies.get(i);
@@ -151,5 +161,7 @@ public class Game extends Application {
         //Display SCORE
         graphicsContext.setFill(Color.BLACK);
         graphicsContext.fillText("Score: " + score, 10, 20);
+
+
     }
 }
