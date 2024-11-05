@@ -13,7 +13,11 @@ public class Player {
     private int hp = 100;
     private SpriteAnimation spriteAnimation;
     private boolean facingLeft = false;
+
     private Image spriteSheet;
+    private Image sideSpriteSheet;
+    private Image frontSpriteSheet;
+    private Image backSpriteSheet;
 
     private static final int IDLE_ROW = 0, IDLE_COLUMNS = 6;
     private static final int WALK_ROW = 1, WALK_COLUMNS = 8;
@@ -24,8 +28,12 @@ public class Player {
     public Player(double x, double y) {
         this.x = x;
         this.y = y;
-        this.spriteSheet = new Image("file:src/main/resources/Player_Side_Sheet.png");
-        this.spriteAnimation = new SpriteAnimation(spriteSheet, 48, 44, 30); // Set frame width/height based on sprite dimensions
+        this.sideSpriteSheet = new Image("file:src/main/resources/Player/Player_Side_Sheet.png");
+        this.frontSpriteSheet = new Image("file:src/main/resources/Player/Player_Front_Sheet.png");
+        this.backSpriteSheet = new Image("file:src/main/resources/Player/Player_Back_Sheet.png");
+
+        this.spriteSheet = sideSpriteSheet;
+        this.spriteAnimation = new SpriteAnimation(spriteSheet, 48, 44, 30);
         setIdleAnimation(); // Start with idle animation
     }
 
@@ -101,8 +109,17 @@ public class Player {
         double newX = x + dx;
         double newY = y + dy;
 
-        if (dx < 0) facingLeft = true;
-        if (dx > 0) facingLeft = false;
+        if (dx < 0) {
+            facingLeft = true;
+            this.spriteSheet = sideSpriteSheet;
+        } else if (dx > 0) {
+            facingLeft = false;
+            this.spriteSheet = sideSpriteSheet;
+        } else if (dy < 0) {
+            this.spriteSheet = backSpriteSheet; // Moving north (back-facing)
+        } else if (dy > 0) {
+            this.spriteSheet = frontSpriteSheet; // Moving south (front-facing)
+        }
 
         for (Wall wall : Game.getWalls()) {
             if (wall.collides(newX, y, WIDTH, WIDTH)) {
