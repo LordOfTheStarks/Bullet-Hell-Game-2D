@@ -12,7 +12,7 @@ public class TerrainManager {
     private List<Image> grassImages;
     private List<Image> rockImages;
 
-    private static final int TILE_SIZE = 50;
+    private static final int TILE_SIZE = 30;
     private static final int ROCK_PROBABILITY = 10; // 10% chance of a rock
     private static final int GRASS_PROBABILITY = 80; // 50% chance of grass
 
@@ -32,13 +32,13 @@ public class TerrainManager {
     }
 
     private void generateTerrain() {
-        Random rand = new Random();
+        Random random = new Random();
         for (int x = 0; x < AppConfig.getWidth(); x += TILE_SIZE) {
             for (int y = 0; y < AppConfig.getHeight(); y += TILE_SIZE) {
-                if (rand.nextInt(100) < GRASS_PROBABILITY) {
+                if (random.nextInt(100) < GRASS_PROBABILITY) {
                     terrainObjects.add(new TerrainObject(x, y, randomImage(grassImages)));
                 }
-                if (rand.nextInt(100) < ROCK_PROBABILITY && !isOverlapping(x, y)) {
+                if (random.nextInt(100) < ROCK_PROBABILITY && !isOverlapping(x, y)) {
                     terrainObjects.add(new TerrainObject(x, y, randomImage(rockImages)));
                 }
             }

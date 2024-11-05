@@ -61,7 +61,7 @@ public class MainMenu extends Application {
         root.getChildren().add(imageView);
     }
     private void addTitle() {
-        MenuTitle title = new MenuTitle("Bullet Hell");
+        MenuTitle title = new MenuTitle("Shooter Game");
         title.setTranslateX(AppConfig.getWidth() / 2 - title.getTitleWidth() / 2);
         title.setTranslateY(AppConfig.getHeight() / 3);
 
@@ -104,7 +104,7 @@ public class MainMenu extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Scene scene = new Scene(createContent());
-        primaryStage.setTitle("Bullet Hell Menu");
+        primaryStage.setTitle("Shooter Game Menu");
         primaryStage.setScene(scene);
         primaryStage.show();
     }

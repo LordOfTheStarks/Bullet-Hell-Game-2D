@@ -1,8 +1,8 @@
 package com.lordstark.java2d;
 
 public class AppConfig {
-    private static int width = 800;
-    private static int height = 600;
+    private static int width = 640;
+    private static int height = 480;
 
     public static int getWidth() {
         return width;

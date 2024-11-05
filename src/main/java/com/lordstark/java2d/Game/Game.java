@@ -40,7 +40,7 @@ public class Game extends Application {
 
         terrainManager = new TerrainManager();
 
-        tileImage = new Image("file:src/main/resources/tiles/FieldsTile_01.png");
+        tileImage = new Image("file:src/main/resources/tiles/FieldsTile_38.png");
 
         stage.setTitle("Shooter game");
 
@@ -131,11 +131,16 @@ public class Game extends Application {
                 if(e.collides(Player.bullets.get(j).getX(), Player.bullets.get(j).getY(),
                               Enemy.WIDTH, Bullet.WIDTH)) {
                     Player.bullets.remove(j);
-                    enemies.remove(i);
-                    i++;
-                    score += 10;
+                    if(!e.isDead()) {
+                        e.takeDamage(100);
+                        score += 10;
+                    }
                     break;
                 }
+            }
+            if (e.isDead() && e.isDeathAnimationComplete()) {
+                enemies.remove(i);
+                i--;  // Adjust the index to account for the removed element
             }
         }
         this.player.render(graphicsContext, camera);

@@ -1,19 +1,51 @@
 package com.lordstark.java2d.Game;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
 public class Enemy {
     private double x, y;
     private Player player;
-    public static final double WIDTH = 40;
+    public static final double WIDTH = 80;
     private static final double SPEED = 2;
+
+    private boolean isAttacking = false;
+    private boolean isDead = false;
+
+    private SpriteAnimation spriteAnimation;
+    private Image walkingSpriteSheet;
+    private Image attackingSpriteSheet;
+    private Image deathSpriteSheet;
+    private static final int WALK_COLUMNS = 6;
+    private static final int ATTACK_COLUMNS = 6;
+    private static final int DEATH_COLUMNS = 6;
 
     public Enemy(Player p, double x, double y) {
         this.player = p;
         this.x = x;
         this.y = y;
+
+        // Load the sprite sheets for each animation
+        walkingSpriteSheet = new Image("file:src/main/resources/D_Walk.png");
+        attackingSpriteSheet = new Image("file:src/main/resources/D_Attack.png");
+        deathSpriteSheet = new Image("file:src/main/resources/D_Death.png");
+
+        // Initialize SpriteAnimation with the walking animation by default
+        spriteAnimation = new SpriteAnimation(walkingSpriteSheet, 48, 48, 10); // Adjust frame width, height, and fps as needed
+        setWalkingAnimation();
     }
+
+    private void setWalkingAnimation() {
+        spriteAnimation.setAnimationRow(walkingSpriteSheet, 0, WALK_COLUMNS);
+    }
+    private void setAttackingAnimation() {
+        spriteAnimation.setAnimationRow(attackingSpriteSheet, 0, ATTACK_COLUMNS);
+    }
+    private void setDeathAnimation() {
+        spriteAnimation.setAnimationRow(deathSpriteSheet, 0, DEATH_COLUMNS);
+    }
+
     private boolean checkCollisionWithEnemies(double nextX, double nextY) {
         for (Enemy e : Game.enemies) {
             if (e != this && e.collides(nextX, nextY, WIDTH, WIDTH)) {
@@ -26,48 +58,80 @@ public class Enemy {
         return Math.sqrt(Math.pow(this.x+w1/2-x-w2/2, 2)+Math.pow(this.y+w1/2-y-w2/2, 2)) <= w1/2+w2/2;
     }
     public void render(GraphicsContext graphicsContext, Camera camera) {
-        graphicsContext.setFill(Color.BLUE);
-        graphicsContext.fillOval(x - camera.getOffsetX(),
-                                 y - camera.getOffsetY(), WIDTH, WIDTH);
+        if (isDead && spriteAnimation.isLastFrame()) {
+            // Stop rendering if the death animation is complete
+            return;
+        }
 
-        // Calculate angle to move toward the player
-        double angle = Math.atan2(player.getY() - y, player.getX() - x);
-        double nextX = x + Math.cos(angle) * SPEED;
-        double nextY = y + Math.sin(angle) * SPEED;
+        Image currentFrame = spriteAnimation.getFrame();
+        graphicsContext.drawImage(currentFrame, x - camera.getOffsetX(), y - camera.getOffsetY(), WIDTH, WIDTH);
 
-        // Check collisions with walls and other enemies on X and Y axes separately
-        boolean canMoveX = true;
-        boolean canMoveY = true;
+        if (!isDead) {
+            moveTowardsPlayer();
+        }
+    }
+        private void moveTowardsPlayer() {
+            if (isDead) return;
 
-        for (Wall wall : Game.getWalls()) {
-            if (wall.collides(nextX, y, WIDTH, WIDTH)) {
+            double angle = Math.atan2(player.getY() - y, player.getX() - x);
+            double nextX = x + Math.cos(angle) * SPEED;
+            double nextY = y + Math.sin(angle) * SPEED;
+
+            boolean canMoveX = true;
+            boolean canMoveY = true;
+
+            for (Wall wall : Game.getWalls()) {
+                if (wall.collides(nextX, y, WIDTH, WIDTH)) {
+                    canMoveX = false;
+                }
+                if (wall.collides(x, nextY, WIDTH, WIDTH)) {
+                    canMoveY = false;
+                }
+            }
+
+            if (checkCollisionWithEnemies(nextX, y)) {
                 canMoveX = false;
             }
-            if (wall.collides(x, nextY, WIDTH, WIDTH)) {
+            if (checkCollisionWithEnemies(x, nextY)) {
                 canMoveY = false;
             }
-        }
 
-        // Check collisions with other enemies
-        if (checkCollisionWithEnemies(nextX, y)) {
-            canMoveX = false;
-        }
-        if (checkCollisionWithEnemies(x, nextY)) {
-            canMoveY = false;
-        }
+            if (canMoveX) x = nextX;
+            if (canMoveY) y = nextY;
 
-        // Apply movement only if no collision was detected
-        if (canMoveX) {
-            x = nextX;
-        }
-        if (canMoveY) {
-            y = nextY;
-        }
+            double distanceToPlayer = Math.sqrt(Math.pow(x - player.getX(), 2) + Math.pow(y - player.getY(), 2));
 
-        // Check distance to the player to deal damage if close enough
-        double distanceToPlayer = Math.sqrt(Math.pow(this.x - this.player.getX(), 2) + Math.pow(this.y - this.player.getY(), 2));
-        if (distanceToPlayer <= 40) {
-            this.player.takeDamage(5);
+            if (distanceToPlayer <= 40 && !isAttacking) {
+                startAttacking();
+            } else if (distanceToPlayer > 40 && isAttacking) {
+                stopAttacking();
+            }
         }
+    private void startAttacking() {
+        isAttacking = true;
+        setAttackingAnimation();
+        Game.timerBullet(500, () -> {
+            player.takeDamage(10);
+            stopAttacking();
+        });
+    }
+
+    private void stopAttacking() {
+        isAttacking = false;
+        setWalkingAnimation();
+    }
+
+    public void takeDamage(int damage) {
+        if (isDead) return;
+
+        // If health reaches 0, set to dead and trigger death animation
+        isDead = true;
+        setDeathAnimation();
+    }
+    public boolean isDead() {
+        return isDead;
+    }
+    public boolean isDeathAnimationComplete() {
+        return isDead && spriteAnimation.isLastFrame();
     }
 }
