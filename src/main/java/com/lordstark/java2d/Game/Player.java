@@ -146,6 +146,18 @@ public class Player {
         double worldMouseY = mouseY + Game.camera.getOffsetY();
         double angle = Math.atan2(worldMouseY - this.y, worldMouseX - this.x);
 
+        // Set appropriate sprite direction
+        if (angle < -Math.PI / 4 && angle > -3 * Math.PI / 4) {
+            this.spriteSheet = backSpriteSheet; // Shooting north
+        } else if (angle > Math.PI / 4 && angle < 3 * Math.PI / 4) {
+            this.spriteSheet = frontSpriteSheet; // Shooting south
+        } else {
+            this.spriteSheet = sideSpriteSheet; // Shooting left or right
+            facingLeft = angle > Math.PI / 2 || angle < -Math.PI / 2;
+        }
+
+        setShootAnimation();
+
         Bullet bullet = new Bullet(angle, this.x + WIDTH / 2, this.y + WIDTH / 2);
         bullets.add(bullet);
 
