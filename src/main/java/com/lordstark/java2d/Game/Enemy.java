@@ -27,9 +27,9 @@ public class Enemy {
         this.y = y;
 
         // Load the sprite sheets for each animation
-        walkingSpriteSheet = new Image("file:src/main/resources/D_Walk.png");
-        attackingSpriteSheet = new Image("file:src/main/resources/D_Attack.png");
-        deathSpriteSheet = new Image("file:src/main/resources/D_Death.png");
+        walkingSpriteSheet = new Image("file:src/main/resources/Enemy/D_Walk.png");
+        attackingSpriteSheet = new Image("file:src/main/resources/Enemy/D_Attack.png");
+        deathSpriteSheet = new Image("file:src/main/resources/Enemy/D_Death.png");
 
         // Initialize SpriteAnimation with the walking animation by default
         spriteAnimation = new SpriteAnimation(walkingSpriteSheet, 48, 48, 10); // Adjust frame width, height, and fps as needed

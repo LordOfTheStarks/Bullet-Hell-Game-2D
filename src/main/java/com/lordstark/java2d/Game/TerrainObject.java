@@ -15,4 +15,14 @@ public class TerrainObject {
     public double getX() { return x; }
     public double getY() { return y; }
     public Image getImage() { return image; }
+
+    // Check if tile is empty (no image initially)
+    public boolean isEmpty() {
+        return image == null;
+    }
+
+    // Dynamically change image to another tile
+    public void setImage(Image newImage) {
+        this.image = newImage;
+    }
 }

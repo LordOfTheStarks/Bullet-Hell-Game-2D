@@ -42,8 +42,6 @@ public class Game extends Application {
 
         terrainManager = new TerrainManager();
 
-        tileImage = new Image("file:src/main/resources/tiles/FieldsTile_38.png");
-
         stage.setTitle("Shooter game");
 
         StackPane pane = new StackPane();
@@ -115,15 +113,23 @@ public class Game extends Application {
     private void update(GraphicsContext graphicsContext) {
         camera.update(player);
 
-        double tileWidth = tileImage.getWidth();
-        double tileHeight = tileImage.getHeight();
+        // Update terrain around the player's position
+        terrainManager.updateTerrain(player.getX(), player.getY());
+
+        // Render the base tile layer dynamically
+        double tileWidth = terrainManager.getMainTile().getWidth();
+        double tileHeight = terrainManager.getMainTile().getHeight();
         for (int x = 0; x < AppConfig.getWidth(); x += tileWidth) {
             for (int y = 0; y < AppConfig.getHeight(); y += tileHeight) {
-                graphicsContext.drawImage(tileImage, x - camera.getOffsetX() % tileWidth,
-                                          y - camera.getOffsetY() % tileHeight);
+                graphicsContext.drawImage(
+                        terrainManager.getMainTile(),
+                        x - camera.getOffsetX() % tileWidth,
+                        y - camera.getOffsetY() % tileHeight
+                );
             }
         }
 
+        // Render dynamically generated terrain (grass, rocks, etc.)
         terrainManager.render(graphicsContext, camera);
 
         for(int i = 0; i < enemies.size(); i++) {
