@@ -3,6 +3,7 @@ package com.lordstark.java2d.Game;
 import java.util.*;
 
 import com.lordstark.java2d.AppConfig;
+import com.lordstark.java2d.Menu.MainMenu;
 import javafx.animation.KeyFrame;
 import javafx.animation.*;
 import javafx.application.Application;
@@ -13,6 +14,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -169,9 +171,10 @@ public class Game extends Application {
         }
 
         //Display SCORE
+        double fontSize = AppConfig.getWidth() * 0.025;
+        graphicsContext.setFont(Font.loadFont(MainMenu.class.getResource("/joystix-monospace.otf").toExternalForm(), fontSize));
         graphicsContext.setFill(Color.BLACK);
         graphicsContext.fillText("Score: " + score, 10, 20);
-
 
     }
 }
