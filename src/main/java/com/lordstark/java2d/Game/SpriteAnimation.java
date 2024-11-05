@@ -20,7 +20,8 @@ public class SpriteAnimation {
     }
 
     // Configure animation with variable columns for each row
-    public void setAnimationRow(Image spriteSheet, int row, int columns) {
+    public void setAnimationRow(Image spriteSheet, int row, int columns, long newFrameDuration) {
+        this.frameDuration = newFrameDuration;
         PixelReader reader = spriteSheet.getPixelReader();
         if (reader == null) {
             System.out.println("Error: Sprite sheet image could not be read.");

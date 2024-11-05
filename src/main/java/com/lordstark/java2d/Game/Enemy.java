@@ -37,13 +37,13 @@ public class Enemy {
     }
 
     private void setWalkingAnimation() {
-        spriteAnimation.setAnimationRow(walkingSpriteSheet, 0, WALK_COLUMNS);
+        spriteAnimation.setAnimationRow(walkingSpriteSheet, 0, WALK_COLUMNS, 83);
     }
     private void setAttackingAnimation() {
-        spriteAnimation.setAnimationRow(attackingSpriteSheet, 0, ATTACK_COLUMNS);
+        spriteAnimation.setAnimationRow(attackingSpriteSheet, 0, ATTACK_COLUMNS, 83);
     }
     private void setDeathAnimation() {
-        spriteAnimation.setAnimationRow(deathSpriteSheet, 0, DEATH_COLUMNS);
+        spriteAnimation.setAnimationRow(deathSpriteSheet, 0, DEATH_COLUMNS, 56);
     }
 
     private boolean checkCollisionWithEnemies(double nextX, double nextY) {

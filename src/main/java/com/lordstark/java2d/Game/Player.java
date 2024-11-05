@@ -8,7 +8,8 @@ import java.util.*;
 public class Player {
     private double x, y;
     public static List<Bullet> bullets = new ArrayList<>();
-    private static final double WIDTH = 50;
+    private static final double WIDTH = 70;
+    private static final double HEIGHT = 70;
     private boolean shooting = false, damage = false, isDead = false;
     private int hp = 100;
     private SpriteAnimation spriteAnimation;
@@ -25,6 +26,12 @@ public class Player {
     private static final int DAMAGE_ROW = 3, DAMAGE_COLUMNS = 1;
     private static final int DEATH_ROW = 4, DEATH_COLUMNS = 14;
 
+    private static final long IDLE_DURATION = 167;
+    private static final long WALK_DURATION = 125;
+    private static final long SHOOT_DURATION = 56;
+    private static final long DAMAGE_DURATION = 100;
+    private static final long DEATH_DURATION = 125;
+
     public Player(double x, double y) {
         this.x = x;
         this.y = y;
@@ -33,7 +40,7 @@ public class Player {
         this.backSpriteSheet = new Image("file:src/main/resources/Player/Player_Back_Sheet.png");
 
         this.spriteSheet = sideSpriteSheet;
-        this.spriteAnimation = new SpriteAnimation(spriteSheet, 48, 44, 30);
+        this.spriteAnimation = new SpriteAnimation(spriteSheet, 48, 44, 12);
         setIdleAnimation(); // Start with idle animation
     }
 
@@ -47,23 +54,23 @@ public class Player {
         return this.hp;
     }
     private void setIdleAnimation() {
-        spriteAnimation.setAnimationRow(spriteSheet, IDLE_ROW, IDLE_COLUMNS);
+        spriteAnimation.setAnimationRow(spriteSheet, IDLE_ROW, IDLE_COLUMNS, IDLE_DURATION);
     }
 
     private void setWalkAnimation() {
-        spriteAnimation.setAnimationRow(spriteSheet, WALK_ROW, WALK_COLUMNS);
+        spriteAnimation.setAnimationRow(spriteSheet, WALK_ROW, WALK_COLUMNS, WALK_DURATION);
     }
 
     private void setShootAnimation() {
-        spriteAnimation.setAnimationRow(spriteSheet, SHOOT_ROW, SHOOT_COLUMNS);
+        spriteAnimation.setAnimationRow(spriteSheet, SHOOT_ROW, SHOOT_COLUMNS, SHOOT_DURATION);
     }
 
     private void setDamageAnimation() {
-        spriteAnimation.setAnimationRow(spriteSheet, DAMAGE_ROW, DAMAGE_COLUMNS);
+        spriteAnimation.setAnimationRow(spriteSheet, DAMAGE_ROW, DAMAGE_COLUMNS, DAMAGE_DURATION);
     }
 
     private void setDeathAnimation() {
-        spriteAnimation.setAnimationRow(spriteSheet, DEATH_ROW, DEATH_COLUMNS);
+        spriteAnimation.setAnimationRow(spriteSheet, DEATH_ROW, DEATH_COLUMNS, DEATH_DURATION);
     }
 
     public void takeDamage(int dmg) {
@@ -95,9 +102,9 @@ public class Player {
         graphicsContext.save();
         if (facingLeft) {
             graphicsContext.scale(-1, 1);
-            graphicsContext.drawImage(currentFrame, -(this.x - camera.getOffsetX()) - WIDTH, this.y - camera.getOffsetY());
+            graphicsContext.drawImage(currentFrame, -(this.x - camera.getOffsetX()) - WIDTH, this.y - camera.getOffsetY(), WIDTH, HEIGHT);
         } else {
-            graphicsContext.drawImage(currentFrame, this.x - camera.getOffsetX(), this.y - camera.getOffsetY());
+            graphicsContext.drawImage(currentFrame, this.x - camera.getOffsetX(), this.y - camera.getOffsetY(), WIDTH, HEIGHT);
         }
         graphicsContext.restore();
 
