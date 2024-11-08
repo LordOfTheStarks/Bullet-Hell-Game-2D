@@ -149,18 +149,6 @@ public class TerrainManager {
             double houseWidth = house.getWidth() - (collisionOffset * 2);
             double houseHeight = house.getHeight() - (collisionOffset * 2);
 
-            // Draw collision boundaries for debugging (uncomment when needed)
-        /*
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.setStroke(Color.RED);
-        gc.strokeRect(
-            houseX - camera.getOffsetX(),
-            houseY - camera.getOffsetY(),
-            houseWidth,
-            houseHeight
-        );
-        */
-
             if (x + width > houseX &&
                     x < houseX + houseWidth &&
                     y + height > houseY &&
