@@ -29,13 +29,12 @@ public class TerrainManager {
     private static final int RADIUS = 10; // Radius around the player for tile generation
     private static final int ROCK_PROBABILITY = 10; // 10% chance of a rock
     private static final int GRASS_PROBABILITY = 30; // 30% chance of grass
-    private static final int TREE_PROBABILITY = 15; // 15% chance of tree generation
     private static final int MIN_TREE_SPACING = 100; // Minimum distance between trees
 
     public TerrainManager() {
         this.terrainMap = new HashMap<>();
-        this.grassImages = loadImages("Grass", 6);
-        this.rockImages = loadImages("Rocks", 6);
+        this.grassImages = loadImages("Grass");
+        this.rockImages = loadImages("Rocks");
         this.staticHouses = initializeStaticHouses(); // Initialize static houses
 
         this.trees = new ArrayList<>();
@@ -45,15 +44,15 @@ public class TerrainManager {
         initializeTrees();
     }
 
-    private List<Image> loadImages(String type, int count) {
+    private List<Image> loadImages(String type) {
         List<Image> images = new ArrayList<>();
-        for (int i = 1; i <= count; i++) {
+        for (int i = 1; i <= 6; i++) {
             images.add(new Image("file:src/main/resources/" + type + "/" + i + ".png"));
         }
         return images;
     }
     // Inner class to handle tree and shadow pairing
-    private class TreeObject {
+    private static class TreeObject {
         private final double x, y;
         private final Image treeImage;
         private final Image shadowImage;
@@ -98,8 +97,8 @@ public class TerrainManager {
 
         while (treesPlaced < MAX_TREES && attempts < maxAttempts) {
             // Generate position within world bounds
-            double x = random.nextDouble() * (WORLD_WIDTH - 100) - WORLD_WIDTH/2;
-            double y = random.nextDouble() * (WORLD_HEIGHT - 100) - WORLD_HEIGHT/2;
+            double x = random.nextDouble() * (WORLD_WIDTH - 100) - (double) WORLD_WIDTH /2;
+            double y = random.nextDouble() * (WORLD_HEIGHT - 100) - (double) WORLD_HEIGHT /2;
 
             // Check if position is valid
             if (isValidTreePosition(x, y)) {
@@ -112,7 +111,7 @@ public class TerrainManager {
 
     private boolean isValidTreePosition(double x, double y) {
         // Check distance from houses
-        if (x < -WORLD_WIDTH/2 || x > WORLD_WIDTH/2 || y < -WORLD_HEIGHT/2 || y > WORLD_HEIGHT/2) {
+        if (x < (double) -WORLD_WIDTH /2 || x > (double) WORLD_WIDTH /2 || y < (double) -WORLD_HEIGHT /2 || y > (double) WORLD_HEIGHT /2) {
             return false;
         }
 
@@ -123,7 +122,7 @@ public class TerrainManager {
 
         // Check distance from houses
         for (TerrainObject house : staticHouses) {
-            double distance = Math.sqrt(Math.pow(x - house.getX(), 2) + Math.pow(y - house.getY(), 2));
+            double distance = Math.sqrt(Math.pow(x - house.x(), 2) + Math.pow(y - house.y(), 2));
             if (distance < HOUSE_SAFE_ZONE) return false;
         }
 
@@ -156,8 +155,8 @@ public class TerrainManager {
 
     public void updateTerrain(double playerX, double playerY) {
         // Clamp player position to world bounds for terrain generation
-        playerX = Math.max(-WORLD_WIDTH/2, Math.min(WORLD_WIDTH/2, playerX));
-        playerY = Math.max(-WORLD_HEIGHT/2, Math.min(WORLD_HEIGHT/2, playerY));
+        playerX = Math.max((double) -WORLD_WIDTH /2, Math.min((double) WORLD_WIDTH /2, playerX));
+        playerY = Math.max((double) -WORLD_HEIGHT /2, Math.min((double) WORLD_HEIGHT /2, playerY));
 
         int playerTileX = (int) (playerX / TILE_SIZE);
         int playerTileY = (int) (playerY / TILE_SIZE);
@@ -215,11 +214,11 @@ public class TerrainManager {
 
         // Render dynamically generated terrain objects (grass, rocks, etc.)
         for (TerrainObject obj : terrainMap.values()) {
-            if (obj.getImage() != null) {
+            if (obj.image() != null) {
                 graphicsContext.drawImage(
-                        obj.getImage(),
-                        obj.getX() - camera.getOffsetX(),
-                        obj.getY() - camera.getOffsetY()
+                        obj.image(),
+                        obj.x() - camera.getOffsetX(),
+                        obj.y() - camera.getOffsetY()
                 );
             }
         }
@@ -227,9 +226,9 @@ public class TerrainManager {
         // Render static houses with fixed positions
         for (TerrainObject house : staticHouses) {
             graphicsContext.drawImage(
-                    house.getImage(),
-                    house.getX() - camera.getOffsetX(),
-                    house.getY() - camera.getOffsetY()
+                    house.image(),
+                    house.x() - camera.getOffsetX(),
+                    house.y() - camera.getOffsetY()
             );
         }
         // First render all shadows
@@ -252,18 +251,6 @@ public class TerrainManager {
                     tree.getX() - camera.getOffsetX(),
                     tree.getY() - camera.getOffsetY()
             );
-
-            // Uncomment for debugging collision boxes
-            /*
-            double[] bounds = tree.getCollisionBounds();
-            graphicsContext.setStroke(javafx.scene.paint.Color.RED);
-            graphicsContext.strokeRect(
-                bounds[0] - camera.getOffsetX(),
-                bounds[1] - camera.getOffsetY(),
-                bounds[2],
-                bounds[3]
-            );
-            */
         }
     }
 
@@ -276,8 +263,8 @@ public class TerrainManager {
 
         for (TerrainObject house : staticHouses) {
             // Adjust collision boundaries to be slightly smaller than the actual house image
-            double houseX = house.getX() + collisionOffset;
-            double houseY = house.getY() + collisionOffset;
+            double houseX = house.x() + collisionOffset;
+            double houseY = house.y() + collisionOffset;
             double houseWidth = house.getWidth() - (collisionOffset * 2);
             double houseHeight = house.getHeight() - (collisionOffset * 2);
 

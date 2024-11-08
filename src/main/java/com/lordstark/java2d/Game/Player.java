@@ -1,7 +1,6 @@
 package com.lordstark.java2d.Game;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
 
 import java.util.*;
 
@@ -12,14 +11,14 @@ public class Player {
     private static final double HEIGHT = 70;
     private boolean shooting = false, damage = false, isDead = false;
     private int hp = 100;
-    private SpriteAnimation spriteAnimation;
+    private final SpriteAnimation spriteAnimation;
     private boolean facingLeft = false;
     private TerrainManager terrainManager;
 
     private Image spriteSheet;
-    private Image sideSpriteSheet;
-    private Image frontSpriteSheet;
-    private Image backSpriteSheet;
+    private final Image sideSpriteSheet;
+    private final Image frontSpriteSheet;
+    private final Image backSpriteSheet;
 
     private static final int IDLE_ROW = 0, IDLE_COLUMNS = 6;
     private static final int WALK_ROW = 1, WALK_COLUMNS = 8;
@@ -41,7 +40,7 @@ public class Player {
         this.backSpriteSheet = new Image("file:src/main/resources/Player/Player_Back_Sheet.png");
 
         this.spriteSheet = sideSpriteSheet;
-        this.spriteAnimation = new SpriteAnimation(spriteSheet, 48, 44, 12);
+        this.spriteAnimation = new SpriteAnimation(48, 44, 12);
         setIdleAnimation(); // Start with idle animation
     }
 
@@ -109,8 +108,8 @@ public class Player {
         }
         graphicsContext.restore();
 
-        for (int i = 0; i < this.bullets.size(); i++) {
-            this.bullets.get(i).render(graphicsContext, camera);
+        for (Bullet bullet : bullets) {
+            bullet.render(graphicsContext, camera);
         }
     }
     public void move(double dx, double dy) {

@@ -4,7 +4,9 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 public class Bullet {
-    private double angle, x, y;
+    private final double angle;
+    private double x;
+    private double y;
     private static final double SPEED = 18;
     public static final double WIDTH = 5;
 

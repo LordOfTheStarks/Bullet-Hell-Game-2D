@@ -10,7 +10,6 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -23,7 +22,7 @@ public class Game extends Application {
     public static Camera camera;
     private static final double SPEED = 8;
     private Player player;
-    private Map<KeyCode, Boolean> keys = new HashMap<>();
+    private final Map<KeyCode, Boolean> keys = new HashMap<>();
     public static List<Enemy> enemies = new ArrayList<>();
     private int score = 0;
     private TerrainManager terrainManager;
@@ -95,7 +94,7 @@ public class Game extends Application {
                 while (true) {
                     double x = random.nextDouble()*AppConfig.getWidth();
                     double y = random.nextDouble()*AppConfig.getHeight();
-                    this.enemies.add(new Enemy(this.player, x, y, terrainManager));
+                    enemies.add(new Enemy(this.player, x, y, terrainManager));
                     Thread.sleep(2000);
                 }
             }catch (InterruptedException ex) {
@@ -106,19 +105,19 @@ public class Game extends Application {
     }
     private void update(GraphicsContext graphicsContext) {
         // Clamp player position to world bounds
-        double clampedX = Math.max(-TerrainManager.WORLD_WIDTH/2,
-                                   Math.min(TerrainManager.WORLD_WIDTH/2, player.getX()));
-        double clampedY = Math.max(-TerrainManager.WORLD_HEIGHT/2,
-                                   Math.min(TerrainManager.WORLD_HEIGHT/2, player.getY()));
+        double clampedX = Math.max((double) -TerrainManager.WORLD_WIDTH /2,
+                                   Math.min((double) TerrainManager.WORLD_WIDTH /2, player.getX()));
+        double clampedY = Math.max((double) -TerrainManager.WORLD_HEIGHT /2,
+                                   Math.min((double) TerrainManager.WORLD_HEIGHT /2, player.getY()));
         player.setPosition(clampedX, clampedY);
 
         // Update and clean up bullets that are out of bounds
         for (int i = Player.bullets.size() - 1; i >= 0; i--) {
             Bullet bullet = Player.bullets.get(i);
-            if (bullet.getX() < -TerrainManager.WORLD_WIDTH/2 ||
-                    bullet.getX() > TerrainManager.WORLD_WIDTH/2 ||
-                    bullet.getY() < -TerrainManager.WORLD_HEIGHT/2 ||
-                    bullet.getY() > TerrainManager.WORLD_HEIGHT/2) {
+            if (bullet.getX() < (double) -TerrainManager.WORLD_WIDTH /2 ||
+                    bullet.getX() > (double) TerrainManager.WORLD_WIDTH /2 ||
+                    bullet.getY() < (double) -TerrainManager.WORLD_HEIGHT /2 ||
+                    bullet.getY() > (double) TerrainManager.WORLD_HEIGHT /2) {
                 Player.bullets.remove(i);
             }
         }
@@ -131,8 +130,8 @@ public class Game extends Application {
         // Render the base tile layer dynamically
         double tileWidth = terrainManager.getMainTile().getWidth();
         double tileHeight = terrainManager.getMainTile().getHeight();
-        for (int x = 0; x < AppConfig.getWidth(); x += tileWidth) {
-            for (int y = 0; y < AppConfig.getHeight(); y += tileHeight) {
+        for (int x = 0; x < AppConfig.getWidth(); x += (int) tileWidth) {
+            for (int y = 0; y < AppConfig.getHeight(); y += (int) tileHeight) {
                 graphicsContext.drawImage(
                         terrainManager.getMainTile(),
                         x - camera.getOffsetX() % tileWidth,
@@ -159,8 +158,7 @@ public class Game extends Application {
                 }
                 if (e.collides(bullet.getX(), bullet.getY(), Enemy.WIDTH, Bullet.WIDTH)) {
                     Player.bullets.remove(j);
-                    j--;
-                    e.takeDamage(100);
+                    e.takeDamage();
                     score += 10;
                     break;
                 }
@@ -194,7 +192,7 @@ public class Game extends Application {
 
         //Display SCORE
         double fontSize = AppConfig.getWidth() * 0.025;
-        graphicsContext.setFont(Font.loadFont(MainMenu.class.getResource("/joystix-monospace.otf").toExternalForm(), fontSize));
+        graphicsContext.setFont(Font.loadFont(Objects.requireNonNull(MainMenu.class.getResource("/joystix-monospace.otf")).toExternalForm(), fontSize));
         graphicsContext.setFill(Color.BLACK);
         graphicsContext.fillText("Score: " + score, 10, 20);
     }

@@ -2,11 +2,10 @@ package com.lordstark.java2d.Game;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
 
 public class Enemy {
     private double x, y;
-    private Player player;
+    private final Player player;
     public static final double WIDTH = 80;
     private static final double SPEED = 2;
 
@@ -15,10 +14,10 @@ public class Enemy {
     private boolean isAttacking = false;
     private boolean isDead = false;
 
-    private SpriteAnimation spriteAnimation;
-    private Image walkingSpriteSheet;
-    private Image attackingSpriteSheet;
-    private Image deathSpriteSheet;
+    private final SpriteAnimation spriteAnimation;
+    private final Image walkingSpriteSheet;
+    private final Image attackingSpriteSheet;
+    private final Image deathSpriteSheet;
     private static final int WALK_COLUMNS = 6;
     private static final int ATTACK_COLUMNS = 6;
     private static final int DEATH_COLUMNS = 6;
@@ -35,7 +34,7 @@ public class Enemy {
         deathSpriteSheet = new Image("file:src/main/resources/Enemy/D_Death.png");
 
         // Initialize SpriteAnimation with the walking animation by default
-        spriteAnimation = new SpriteAnimation(walkingSpriteSheet, 48, 48, 10); // Adjust frame width, height, and fps as needed
+        spriteAnimation = new SpriteAnimation(48, 48, 10); // Adjust frame width, height, and fps as needed
         setWalkingAnimation();
     }
 
@@ -95,7 +94,6 @@ public class Enemy {
 
         double nextX = x + dx;
         double nextY = y + dy;
-        boolean moved = false;
 
         // Calculate actual collision bounds
         double collisionWidth = TerrainManager.getActualSpriteWidth(WIDTH);
@@ -109,14 +107,12 @@ public class Enemy {
                                               collisionWidth, collisionHeight) &&
                 !checkCollisionWithEnemies(nextX, y)) {
             x = nextX;
-            moved = true;
         }
 
         if (!terrainManager.collidesWithHouse(x + offsetX, nextY + offsetY,
                                               collisionWidth, collisionHeight) &&
                 !checkCollisionWithEnemies(x, nextY)) {
             y = nextY;
-            moved = true;
         }
 
         // Check for attack range
@@ -143,7 +139,7 @@ public class Enemy {
         setWalkingAnimation();
     }
 
-    public void takeDamage(int damage) {
+    public void takeDamage() {
         if (isDead) return;
 
         // If health reaches 0, set to dead and trigger death animation

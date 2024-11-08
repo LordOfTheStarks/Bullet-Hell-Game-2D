@@ -12,10 +12,10 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 public class MenuItem extends Pane {
-    private Text text;
+    private final Text text;
 
-    private Effect shadow = new DropShadow(5, Color.BLACK);
-    private Effect blur = new BoxBlur(1, 1, 1);
+    private final Effect shadow = new DropShadow(5, Color.BLACK);
+    private final Effect blur = new BoxBlur(1, 1, 1);
 
     public MenuItem(String name) {
         Polygon bg = new Polygon(

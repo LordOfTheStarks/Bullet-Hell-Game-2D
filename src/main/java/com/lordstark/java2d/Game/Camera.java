@@ -12,8 +12,8 @@ public class Camera {
 
     // Updates camera position to center on the player
     public void update(Player player) {
-        this.offsetX = player.getX() - AppConfig.getWidth() / 2;
-        this.offsetY = player.getY() - AppConfig.getHeight() / 2;
+        this.offsetX = player.getX() - (double) AppConfig.getWidth() / 2;
+        this.offsetY = player.getY() - (double) AppConfig.getHeight() / 2;
     }
 
     public double getOffsetX() {

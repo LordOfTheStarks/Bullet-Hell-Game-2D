@@ -11,7 +11,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -28,14 +27,14 @@ import java.util.List;
 
 public class MainMenu extends Application {
 
-    private List<Pair<String, Runnable>> menuData = Arrays.asList(
+    private final List<Pair<String, Runnable>> menuData = Arrays.asList(
             new Pair<String, Runnable>("Play", this::startGame),
             new Pair<String, Runnable>("Settings", this::openSettings),
             new Pair<String, Runnable>("Quit", this::quitGame)
     );
 
-    private Pane root = new Pane();
-    private VBox menuBox = new VBox(-5);
+    private final Pane root = new Pane();
+    private final VBox menuBox = new VBox(-5);
     private Line line;
 
     private Parent createContent() {

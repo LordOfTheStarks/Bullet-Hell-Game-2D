@@ -7,7 +7,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 public class MenuTitle extends Pane {
-    private Text text;
+    private final Text text;
 
     public MenuTitle(String name) {
         String spread = "";

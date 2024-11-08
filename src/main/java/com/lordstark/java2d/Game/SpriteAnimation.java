@@ -10,10 +10,10 @@ public class SpriteAnimation {
     private long lastFrameTime;
     private long frameDuration;
 
-    private int frameWidth;
-    private int frameHeight;
+    private final int frameWidth;
+    private final int frameHeight;
 
-    public SpriteAnimation(Image spriteSheet, int frameWidth, int frameHeight, int fps) {
+    public SpriteAnimation(int frameWidth, int frameHeight, int fps) {
         this.frameWidth = frameWidth;
         this.frameHeight = frameHeight;
         this.frameDuration = 1000 / fps;
