@@ -173,10 +173,10 @@ public class TerrainManager {
 
     // Add these helper methods to get actual sprite dimensions
     public static double getActualSpriteWidth(double width) {
-        return width * 0.8; // Adjust this multiplier to fine-tune sprite collision width
+        return width * 0.3; // Adjust this multiplier to fine-tune sprite collision width
     }
 
     public static double getActualSpriteHeight(double height) {
-        return height * 0.8; // Adjust this multiplier to fine-tune sprite collision height
+        return height * 0.3; // Adjust this multiplier to fine-tune sprite collision height
     }
 }

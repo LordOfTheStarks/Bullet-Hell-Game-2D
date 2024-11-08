@@ -26,7 +26,6 @@ public class Game extends Application {
     private Map<KeyCode, Boolean> keys = new HashMap<>();
     public static List<Enemy> enemies = new ArrayList<>();
     private int score = 0;
-    private Image tileImage;
     private TerrainManager terrainManager;
 
     public static void main(String[] args) {
