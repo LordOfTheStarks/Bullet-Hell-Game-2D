@@ -25,4 +25,13 @@ public class TerrainObject {
     public void setImage(Image newImage) {
         this.image = newImage;
     }
+
+    // Add these methods to get the width and height of the image
+    public double getWidth() {
+        return image != null ? image.getWidth() : 0;
+    }
+
+    public double getHeight() {
+        return image != null ? image.getHeight() : 0;
+    }
 }

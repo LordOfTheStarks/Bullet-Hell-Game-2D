@@ -10,6 +10,8 @@ public class Enemy {
     public static final double WIDTH = 80;
     private static final double SPEED = 2;
 
+    private TerrainManager terrainManager;
+
     private boolean isAttacking = false;
     private boolean isDead = false;
 
@@ -21,10 +23,11 @@ public class Enemy {
     private static final int ATTACK_COLUMNS = 6;
     private static final int DEATH_COLUMNS = 6;
 
-    public Enemy(Player p, double x, double y) {
+    public Enemy(Player p, double x, double y, TerrainManager terrainManager) {
         this.player = p;
         this.x = x;
         this.y = y;
+        this.terrainManager = terrainManager;
 
         // Load the sprite sheets for each animation
         walkingSpriteSheet = new Image("file:src/main/resources/Enemy/D_Walk.png");
@@ -47,9 +50,22 @@ public class Enemy {
     }
 
     private boolean checkCollisionWithEnemies(double nextX, double nextY) {
+        double collisionWidth = TerrainManager.getActualSpriteWidth(WIDTH);
+        double collisionHeight = TerrainManager.getActualSpriteHeight(WIDTH);
+        double offsetX = (WIDTH - collisionWidth) / 2;
+        double offsetY = (WIDTH - collisionHeight) / 2;
+
         for (Enemy e : Game.enemies) {
-            if (e != this && e.collides(nextX, nextY, WIDTH, WIDTH)) {
-                return true;
+            if (e != this) {
+                double otherOffsetX = (WIDTH - collisionWidth) / 2;
+                double otherOffsetY = (WIDTH - collisionHeight) / 2;
+
+                if (nextX + offsetX + collisionWidth > e.x + otherOffsetX &&
+                        nextX + offsetX < e.x + otherOffsetX + collisionWidth &&
+                        nextY + offsetY + collisionHeight > e.y + otherOffsetY &&
+                        nextY + offsetY < e.y + otherOffsetY + collisionHeight) {
+                    return true;
+                }
             }
         }
         return false;
@@ -70,43 +86,49 @@ public class Enemy {
             moveTowardsPlayer();
         }
     }
-        private void moveTowardsPlayer() {
-            if (isDead) return;
+    private void moveTowardsPlayer() {
+        if (isDead) return;
 
-            double angle = Math.atan2(player.getY() - y, player.getX() - x);
-            double nextX = x + Math.cos(angle) * SPEED;
-            double nextY = y + Math.sin(angle) * SPEED;
+        double angle = Math.atan2(player.getY() - y, player.getX() - x);
+        double dx = Math.cos(angle) * SPEED;
+        double dy = Math.sin(angle) * SPEED;
 
-            boolean canMoveX = true;
-            boolean canMoveY = true;
+        double nextX = x + dx;
+        double nextY = y + dy;
+        boolean moved = false;
 
-            for (Wall wall : Game.getWalls()) {
-                if (wall.collides(nextX, y, WIDTH, WIDTH)) {
-                    canMoveX = false;
-                }
-                if (wall.collides(x, nextY, WIDTH, WIDTH)) {
-                    canMoveY = false;
-                }
-            }
+        // Calculate actual collision bounds
+        double collisionWidth = TerrainManager.getActualSpriteWidth(WIDTH);
+        double collisionHeight = TerrainManager.getActualSpriteHeight(WIDTH);
+        // Offset to center the collision box
+        double offsetX = (WIDTH - collisionWidth) / 2;
+        double offsetY = (WIDTH - collisionHeight) / 2;
 
-            if (checkCollisionWithEnemies(nextX, y)) {
-                canMoveX = false;
-            }
-            if (checkCollisionWithEnemies(x, nextY)) {
-                canMoveY = false;
-            }
-
-            if (canMoveX) x = nextX;
-            if (canMoveY) y = nextY;
-
-            double distanceToPlayer = Math.sqrt(Math.pow(x - player.getX(), 2) + Math.pow(y - player.getY(), 2));
-
-            if (distanceToPlayer <= 40 && !isAttacking) {
-                startAttacking();
-            } else if (distanceToPlayer > 40 && isAttacking) {
-                stopAttacking();
-            }
+        // Try moving on each axis separately
+        if (!terrainManager.collidesWithHouse(nextX + offsetX, y + offsetY,
+                                              collisionWidth, collisionHeight) &&
+                !checkCollisionWithEnemies(nextX, y)) {
+            x = nextX;
+            moved = true;
         }
+
+        if (!terrainManager.collidesWithHouse(x + offsetX, nextY + offsetY,
+                                              collisionWidth, collisionHeight) &&
+                !checkCollisionWithEnemies(x, nextY)) {
+            y = nextY;
+            moved = true;
+        }
+
+        // Check for attack range
+        double distanceToPlayer = Math.sqrt(Math.pow(x - player.getX(), 2) +
+                                                    Math.pow(y - player.getY(), 2));
+
+        if (distanceToPlayer <= 40 && !isAttacking) {
+            startAttacking();
+        } else if (distanceToPlayer > 40 && isAttacking) {
+            stopAttacking();
+        }
+    }
     private void startAttacking() {
         isAttacking = true;
         setAttackingAnimation();
@@ -133,5 +155,8 @@ public class Enemy {
     }
     public boolean isDeathAnimationComplete() {
         return isDead && spriteAnimation.isLastFrame();
+    }
+    public void setTerrainManager(TerrainManager terrainManager) {
+        this.terrainManager = terrainManager;
     }
 }

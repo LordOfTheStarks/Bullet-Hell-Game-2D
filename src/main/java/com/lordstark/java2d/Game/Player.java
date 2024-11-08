@@ -14,6 +14,7 @@ public class Player {
     private int hp = 100;
     private SpriteAnimation spriteAnimation;
     private boolean facingLeft = false;
+    private TerrainManager terrainManager;
 
     private Image spriteSheet;
     private Image sideSpriteSheet;
@@ -113,9 +114,38 @@ public class Player {
         }
     }
     public void move(double dx, double dy) {
+        if (isDead) return;
+
         double newX = x + dx;
         double newY = y + dy;
+        boolean moved = false;
 
+        // Calculate actual collision bounds
+        double collisionWidth = TerrainManager.getActualSpriteWidth(WIDTH);
+        double collisionHeight = TerrainManager.getActualSpriteHeight(HEIGHT);
+        // Offset to center the collision box
+        double offsetX = (WIDTH - collisionWidth) / 2;
+        double offsetY = (HEIGHT - collisionHeight) / 2;
+
+        // Try moving on each axis separately to allow sliding along walls
+        if (dx != 0) {
+            if (!terrainManager.collidesWithHouse(newX + offsetX, y + offsetY,
+                                                  collisionWidth, collisionHeight)) {
+                x = newX;
+                moved = true;
+            }
+        }
+
+        if (dy != 0) {
+            if (!terrainManager.collidesWithHouse(x + (moved ? dx : 0) + offsetX,
+                                                  newY + offsetY,
+                                                  collisionWidth, collisionHeight)) {
+                y = newY;
+                moved = true;
+            }
+        }
+
+        // Rest of the movement code remains the same
         if (dx < 0) {
             facingLeft = true;
             this.spriteSheet = sideSpriteSheet;
@@ -123,22 +153,12 @@ public class Player {
             facingLeft = false;
             this.spriteSheet = sideSpriteSheet;
         } else if (dy < 0) {
-            this.spriteSheet = backSpriteSheet; // Moving north (back-facing)
+            this.spriteSheet = backSpriteSheet;
         } else if (dy > 0) {
-            this.spriteSheet = frontSpriteSheet; // Moving south (front-facing)
+            this.spriteSheet = frontSpriteSheet;
         }
 
-        for (Wall wall : Game.getWalls()) {
-            if (wall.collides(newX, y, WIDTH, WIDTH)) {
-                dx = 0;
-            }
-            if (wall.collides(x, newY, WIDTH, WIDTH)) {
-                dy = 0;
-            }
-        }
-        this.x += dx;
-        this.y += dy;
-        if (dx != 0 || dy != 0) {
+        if (moved) {
             setWalkAnimation();
         } else {
             setIdleAnimation();
@@ -173,4 +193,8 @@ public class Player {
             setIdleAnimation();
         });
     }
+    public void setTerrainManager(TerrainManager terrainManager) {
+        this.terrainManager = terrainManager;
+    }
+
 }

@@ -25,7 +25,6 @@ public class Game extends Application {
     private Player player;
     private Map<KeyCode, Boolean> keys = new HashMap<>();
     public static List<Enemy> enemies = new ArrayList<>();
-    private static List<Wall> walls = new ArrayList<>();
     private int score = 0;
     private Image tileImage;
     private TerrainManager terrainManager;
@@ -34,9 +33,6 @@ public class Game extends Application {
         launch(args);
     }
 
-    public static List<Wall> getWalls() {
-        return walls;
-    }
     @Override
     public void start(Stage stage) {
 
@@ -55,6 +51,7 @@ public class Game extends Application {
         pane.getChildren().add(canvas);
 
         this.player = new Player(50, 50);
+        this.player.setTerrainManager(terrainManager); // Link player to terrainManager
 
         Timeline loop = new Timeline(new KeyFrame(Duration.millis(1000.0/60),
                                                   e -> update(graphicsContext)));
@@ -63,7 +60,9 @@ public class Game extends Application {
 
         spawnEnemies();
 
-        initializeWalls();
+        for (Enemy e : enemies) {
+            e.setTerrainManager(terrainManager);
+        }
 
         canvas.setOnKeyPressed(e -> {
             this.keys.put(e.getCode(), true);
@@ -78,10 +77,6 @@ public class Game extends Application {
         Scene scene = new Scene(pane, AppConfig.getWidth(), AppConfig.getHeight());
         stage.setScene(scene);
         stage.show();
-    }
-    private void initializeWalls() {
-        walls.add(new Wall(200, 150, 100, 20));
-        walls.add(new Wall(400,300, 150, 20));
     }
     public static void timerBullet(long time, Runnable r) {
         new Thread(() -> {
@@ -101,7 +96,7 @@ public class Game extends Application {
                 while (true) {
                     double x = random.nextDouble()*AppConfig.getWidth();
                     double y = random.nextDouble()*AppConfig.getHeight();
-                    this.enemies.add(new Enemy(this.player, x, y));
+                    this.enemies.add(new Enemy(this.player, x, y, terrainManager));
                     Thread.sleep(2000);
                 }
             }catch (InterruptedException ex) {
@@ -132,25 +127,34 @@ public class Game extends Application {
         // Render dynamically generated terrain (grass, rocks, etc.)
         terrainManager.render(graphicsContext, camera);
 
-        for(int i = 0; i < enemies.size(); i++) {
+        // Check and update bullets, enemies, player, etc.
+        for (int i = 0; i < enemies.size(); i++) {
             Enemy e = enemies.get(i);
             e.render(graphicsContext, camera);
-            for(int j = 0; j < Player.bullets.size(); j++) {
-                if(e.collides(Player.bullets.get(j).getX(), Player.bullets.get(j).getY(),
-                              Enemy.WIDTH, Bullet.WIDTH)) {
+
+            // Check for bullet collisions with enemies and houses
+            for (int j = 0; j < Player.bullets.size(); j++) {
+                Bullet bullet = Player.bullets.get(j);
+                if (terrainManager.collidesWithHouse(bullet.getX(), bullet.getY(), Bullet.WIDTH, Bullet.WIDTH)) {
                     Player.bullets.remove(j);
-                    if(!e.isDead()) {
-                        e.takeDamage(100);
-                        score += 10;
-                    }
+                    j--;  // Adjust bullet index after removal
+                    continue;
+                }
+                if (e.collides(bullet.getX(), bullet.getY(), Enemy.WIDTH, Bullet.WIDTH)) {
+                    Player.bullets.remove(j);
+                    j--;
+                    e.takeDamage(100);
+                    score += 10;
                     break;
                 }
             }
+
             if (e.isDead() && e.isDeathAnimationComplete()) {
                 enemies.remove(i);
-                i--;  // Adjust the index to account for the removed element
+                i--; // Adjust index for removed enemy
             }
         }
+
         this.player.render(graphicsContext, camera);
 
         if (this.keys.getOrDefault(KeyCode.W, false)){
@@ -171,16 +175,10 @@ public class Game extends Application {
         graphicsContext.setStroke(Color.BLACK);
         graphicsContext.strokeRect(50, AppConfig.getHeight()-80, 100, 30);
 
-        //Draws WALLS
-        for(Wall wall : walls) {
-            wall.render(graphicsContext, camera);
-        }
-
         //Display SCORE
         double fontSize = AppConfig.getWidth() * 0.025;
         graphicsContext.setFont(Font.loadFont(MainMenu.class.getResource("/joystix-monospace.otf").toExternalForm(), fontSize));
         graphicsContext.setFill(Color.BLACK);
         graphicsContext.fillText("Score: " + score, 10, 20);
-
     }
 }

@@ -28,11 +28,5 @@ public class Bullet {
         this.x += Math.cos(this.angle)*SPEED;
         this.y += Math.sin(this.angle)*SPEED;
 
-        for (Wall wall : Game.getWalls()) {
-            if(wall.collides(this.x, this.y, WIDTH, WIDTH)) {
-                Player.bullets.remove(this);
-                return;
-            }
-        }
     }
 }
