@@ -7,6 +7,14 @@ import javafx.scene.image.Image;
 import java.util.*;
 
 public class TerrainManager {
+
+    // In TerrainManager.java, add these constants at the top of the class:
+    public static final int WORLD_WIDTH = 5000;  // Adjust these values as needed
+    public static final int WORLD_HEIGHT = 5000;
+    private static final int SPAWN_SAFE_ZONE = 200; // No trees within this radius of spawn point
+    private static final int HOUSE_SAFE_ZONE = 150; // No trees within this radius of houses
+    private static final int MAX_TREES = 100;  // Maximum number of trees in the world
+
     private final Map<String, TerrainObject> terrainMap; // Stores tiles with unique keys
     private final List<Image> grassImages;
     private final List<Image> rockImages;
@@ -84,24 +92,39 @@ public class TerrainManager {
     }
     private void initializeTrees() {
         Random random = new Random();
-        int numberOfTrees = 20; // Adjust this number based on your map size
+        int treesPlaced = 0;
+        int maxAttempts = MAX_TREES * 3; // Limit attempts to prevent infinite loops
+        int attempts = 0;
 
-        for (int i = 0; i < numberOfTrees; i++) {
-            double x = random.nextDouble() * AppConfig.getWidth() * 2 - AppConfig.getWidth();
-            double y = random.nextDouble() * AppConfig.getHeight() * 2 - AppConfig.getHeight();
+        while (treesPlaced < MAX_TREES && attempts < maxAttempts) {
+            // Generate position within world bounds
+            double x = random.nextDouble() * (WORLD_WIDTH - 100) - WORLD_WIDTH/2;
+            double y = random.nextDouble() * (WORLD_HEIGHT - 100) - WORLD_HEIGHT/2;
 
-            // Check if the position is valid (not too close to other objects)
+            // Check if position is valid
             if (isValidTreePosition(x, y)) {
                 trees.add(new TreeObject(x, y, treeImage, treeShadowImage));
+                treesPlaced++;
             }
+            attempts++;
         }
     }
 
     private boolean isValidTreePosition(double x, double y) {
         // Check distance from houses
+        if (x < -WORLD_WIDTH/2 || x > WORLD_WIDTH/2 || y < -WORLD_HEIGHT/2 || y > WORLD_HEIGHT/2) {
+            return false;
+        }
+
+        // Check if within spawn safe zone
+        if (Math.sqrt(x * x + y * y) < SPAWN_SAFE_ZONE) {
+            return false;
+        }
+
+        // Check distance from houses
         for (TerrainObject house : staticHouses) {
             double distance = Math.sqrt(Math.pow(x - house.getX(), 2) + Math.pow(y - house.getY(), 2));
-            if (distance < MIN_TREE_SPACING) return false;
+            if (distance < HOUSE_SAFE_ZONE) return false;
         }
 
         // Check distance from other trees
@@ -132,31 +155,28 @@ public class TerrainManager {
     }
 
     public void updateTerrain(double playerX, double playerY) {
+        // Clamp player position to world bounds for terrain generation
+        playerX = Math.max(-WORLD_WIDTH/2, Math.min(WORLD_WIDTH/2, playerX));
+        playerY = Math.max(-WORLD_HEIGHT/2, Math.min(WORLD_HEIGHT/2, playerY));
+
         int playerTileX = (int) (playerX / TILE_SIZE);
         int playerTileY = (int) (playerY / TILE_SIZE);
 
-        // Generate surrounding terrain tiles (excluding houses)
+        // Only generate terrain within world bounds
         for (int x = playerTileX - RADIUS; x <= playerTileX + RADIUS; x++) {
             for (int y = playerTileY - RADIUS; y <= playerTileY + RADIUS; y++) {
+                // Skip if outside world bounds
+                if (x * TILE_SIZE < -WORLD_WIDTH/2 || x * TILE_SIZE > WORLD_WIDTH/2 ||
+                        y * TILE_SIZE < -WORLD_HEIGHT/2 || y * TILE_SIZE > WORLD_HEIGHT/2) {
+                    continue;
+                }
+
                 String key = x + "," + y;
                 if (!terrainMap.containsKey(key)) {
                     generateTile(x, y, key);
-                } else {
-                    TerrainObject tile = terrainMap.get(key);
-                    if (tile.isEmpty() && Math.abs(playerTileX - x) <= 2 && Math.abs(playerTileY - y) <= 2) {
-                        tile.setImage(randomImage(grassImages));
-                    }
                 }
             }
         }
-
-        // Remove tiles outside the radius to free memory
-        terrainMap.keySet().removeIf(key -> {
-            String[] coords = key.split(",");
-            int tileX = Integer.parseInt(coords[0]);
-            int tileY = Integer.parseInt(coords[1]);
-            return Math.abs(tileX - playerTileX) > RADIUS || Math.abs(tileY - playerTileY) > RADIUS;
-        });
     }
 
     private void generateTile(int tileX, int tileY, String key) {

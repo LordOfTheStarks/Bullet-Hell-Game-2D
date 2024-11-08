@@ -105,6 +105,24 @@ public class Game extends Application {
         spawner.start();
     }
     private void update(GraphicsContext graphicsContext) {
+        // Clamp player position to world bounds
+        double clampedX = Math.max(-TerrainManager.WORLD_WIDTH/2,
+                                   Math.min(TerrainManager.WORLD_WIDTH/2, player.getX()));
+        double clampedY = Math.max(-TerrainManager.WORLD_HEIGHT/2,
+                                   Math.min(TerrainManager.WORLD_HEIGHT/2, player.getY()));
+        player.setPosition(clampedX, clampedY);
+
+        // Update and clean up bullets that are out of bounds
+        for (int i = Player.bullets.size() - 1; i >= 0; i--) {
+            Bullet bullet = Player.bullets.get(i);
+            if (bullet.getX() < -TerrainManager.WORLD_WIDTH/2 ||
+                    bullet.getX() > TerrainManager.WORLD_WIDTH/2 ||
+                    bullet.getY() < -TerrainManager.WORLD_HEIGHT/2 ||
+                    bullet.getY() > TerrainManager.WORLD_HEIGHT/2) {
+                Player.bullets.remove(i);
+            }
+        }
+
         camera.update(player);
 
         // Update terrain around the player's position
