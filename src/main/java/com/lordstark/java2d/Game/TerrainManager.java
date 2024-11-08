@@ -13,17 +13,28 @@ public class TerrainManager {
     private Image mainTile; // The main tile image to use as the base layer
     private final List<TerrainObject> staticHouses; // Fixed list of houses
 
+    private final List<TreeObject> trees; // New list for trees
+    private final Image treeImage;
+    private final Image treeShadowImage;
+
     private static final int TILE_SIZE = 30;
     private static final int RADIUS = 10; // Radius around the player for tile generation
     private static final int ROCK_PROBABILITY = 10; // 10% chance of a rock
     private static final int GRASS_PROBABILITY = 30; // 30% chance of grass
+    private static final int TREE_PROBABILITY = 15; // 15% chance of tree generation
+    private static final int MIN_TREE_SPACING = 100; // Minimum distance between trees
 
     public TerrainManager() {
         this.terrainMap = new HashMap<>();
         this.grassImages = loadImages("Grass", 6);
         this.rockImages = loadImages("Rocks", 6);
         this.staticHouses = initializeStaticHouses(); // Initialize static houses
+
+        this.trees = new ArrayList<>();
+        this.treeImage = new Image("file:src/main/resources/Trees/Tree1.png");
+        this.treeShadowImage = new Image("file:src/main/resources/Shadows/6.png");
         loadMainTile();
+        initializeTrees();
     }
 
     private List<Image> loadImages(String type, int count) {
@@ -32,6 +43,74 @@ public class TerrainManager {
             images.add(new Image("file:src/main/resources/" + type + "/" + i + ".png"));
         }
         return images;
+    }
+    // Inner class to handle tree and shadow pairing
+    private class TreeObject {
+        private final double x, y;
+        private final Image treeImage;
+        private final Image shadowImage;
+
+        private final double treeWidth;
+        private final double treeHeight;
+        private final double shadowWidth;
+        private final double shadowHeight;
+
+        public TreeObject(double x, double y, Image treeImage, Image shadowImage) {
+            this.x = x;
+            this.y = y;
+            this.treeImage = treeImage;
+            this.shadowImage = shadowImage;
+            this.treeWidth = treeImage.getWidth();
+            this.treeHeight = treeImage.getHeight();
+            this.shadowWidth = shadowImage.getWidth();
+            this.shadowHeight = shadowImage.getHeight();
+        }
+
+        public double getX() { return x; }
+        public double getY() { return y; }
+        public Image getTreeImage() { return treeImage; }
+        public Image getShadowImage() { return shadowImage; }
+
+        // Method to get the base collision rectangle
+        public double[] getCollisionBounds() {
+            // Collision box at the base of the tree, about 1/3 of the tree's width
+            double collisionWidth = treeWidth * 0.3;
+            double collisionHeight = treeHeight * 1.2; // Small height for base collision
+            double collisionX = x + (treeWidth - collisionWidth) / 2;
+            double collisionY = y + treeHeight - collisionHeight;
+
+            return new double[]{collisionX, collisionY, collisionWidth, collisionHeight};
+        }
+    }
+    private void initializeTrees() {
+        Random random = new Random();
+        int numberOfTrees = 20; // Adjust this number based on your map size
+
+        for (int i = 0; i < numberOfTrees; i++) {
+            double x = random.nextDouble() * AppConfig.getWidth() * 2 - AppConfig.getWidth();
+            double y = random.nextDouble() * AppConfig.getHeight() * 2 - AppConfig.getHeight();
+
+            // Check if the position is valid (not too close to other objects)
+            if (isValidTreePosition(x, y)) {
+                trees.add(new TreeObject(x, y, treeImage, treeShadowImage));
+            }
+        }
+    }
+
+    private boolean isValidTreePosition(double x, double y) {
+        // Check distance from houses
+        for (TerrainObject house : staticHouses) {
+            double distance = Math.sqrt(Math.pow(x - house.getX(), 2) + Math.pow(y - house.getY(), 2));
+            if (distance < MIN_TREE_SPACING) return false;
+        }
+
+        // Check distance from other trees
+        for (TreeObject tree : trees) {
+            double distance = Math.sqrt(Math.pow(x - tree.getX(), 2) + Math.pow(y - tree.getY(), 2));
+            if (distance < MIN_TREE_SPACING) return false;
+        }
+
+        return true;
     }
 
     private void loadMainTile() {
@@ -133,6 +212,39 @@ public class TerrainManager {
                     house.getY() - camera.getOffsetY()
             );
         }
+        // First render all shadows
+        for (TreeObject tree : trees) {
+            // Calculate shadow position to be at the base of the tree
+            double shadowX = tree.getX() + (tree.treeWidth - tree.shadowWidth) / 2;
+            double shadowY = tree.getY() + tree.treeHeight - tree.shadowHeight / 2;
+
+            graphicsContext.drawImage(
+                    tree.getShadowImage(),
+                    shadowX - camera.getOffsetX(),
+                    shadowY - camera.getOffsetY()
+            );
+        }
+
+        // Then render all trees
+        for (TreeObject tree : trees) {
+            graphicsContext.drawImage(
+                    tree.getTreeImage(),
+                    tree.getX() - camera.getOffsetX(),
+                    tree.getY() - camera.getOffsetY()
+            );
+
+            // Uncomment for debugging collision boxes
+            /*
+            double[] bounds = tree.getCollisionBounds();
+            graphicsContext.setStroke(javafx.scene.paint.Color.RED);
+            graphicsContext.strokeRect(
+                bounds[0] - camera.getOffsetX(),
+                bounds[1] - camera.getOffsetY(),
+                bounds[2],
+                bounds[3]
+            );
+            */
+        }
     }
 
     public Image getMainTile() {
@@ -153,6 +265,21 @@ public class TerrainManager {
                     x < houseX + houseWidth &&
                     y + height > houseY &&
                     y < houseY + houseHeight) {
+                return true;
+            }
+        }
+        // Check tree collisions with improved collision boxes
+        for (TreeObject tree : trees) {
+            double[] bounds = tree.getCollisionBounds();
+            double treeX = bounds[0];
+            double treeY = bounds[1];
+            double treeWidth = bounds[2];
+            double treeHeight = bounds[3];
+
+            if (x + width > treeX &&
+                    x < treeX + treeWidth &&
+                    y + height > treeY &&
+                    y < treeY + treeHeight) {
                 return true;
             }
         }
