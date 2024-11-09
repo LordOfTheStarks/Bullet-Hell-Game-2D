@@ -4,6 +4,7 @@ import java.util.*;
 
 import com.lordstark.java2d.AppConfig;
 import com.lordstark.java2d.Menu.MainMenu;
+import com.lordstark.java2d.Menu.Settings;
 import javafx.animation.KeyFrame;
 import javafx.animation.*;
 import javafx.application.Application;
@@ -36,7 +37,9 @@ public class Game extends Application {
     private StackPane root;
     private Canvas canvas;
     private VBox gameOverMenu;
+    private VBox pauseMenu;
     private boolean gameWon = false;
+    private boolean isPaused = false;
 
     public static void main(String[] args) {
         launch(args);
@@ -54,6 +57,7 @@ public class Game extends Application {
         // Reset game state
         score = 0;
         gameWon = false;
+        isPaused = false;
         enemies.clear();
         Player.bullets.clear();
 
@@ -87,8 +91,50 @@ public class Game extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        // Initialize game over menu but don't add it yet
+        // Initialize menus but don't add them yet
         createGameOverMenu();
+        createPauseMenu();
+    }
+    private void createPauseMenu() {
+        pauseMenu = new VBox(20);
+        pauseMenu.setAlignment(Pos.CENTER);
+        pauseMenu.setStyle("-fx-background-color: rgba(0, 0, 0, 0.8);");
+        pauseMenu.setPrefWidth(AppConfig.getWidth());
+        pauseMenu.setPrefHeight(AppConfig.getHeight());
+
+        Text pauseText = new Text("Game Paused");
+        pauseText.setFont(Font.loadFont(Objects.requireNonNull(
+                MainMenu.class.getResource("/joystix-monospace.otf")).toExternalForm(), 40));
+        pauseText.setFill(Color.WHITE);
+
+        Button resumeButton = new Button("Resume");
+        resumeButton.setOnAction(e -> resumeGame());
+        styleButton(resumeButton);
+
+        Button replayButton = new Button("Replay");
+        replayButton.setOnAction(e -> restartGame());
+        styleButton(replayButton);
+
+        Button settingsButton = new Button("Settings");
+        settingsButton.setOnAction(e -> openSettings());
+        styleButton(settingsButton);
+
+        Button mainMenuButton = new Button("Main Menu");
+        mainMenuButton.setOnAction(e -> returnToMainMenu());
+        styleButton(mainMenuButton);
+
+        Button quitButton = new Button("Quit");
+        quitButton.setOnAction(e -> System.exit(0));
+        styleButton(quitButton);
+
+        pauseMenu.getChildren().addAll(
+                pauseText,
+                resumeButton,
+                replayButton,
+                settingsButton,
+                mainMenuButton,
+                quitButton
+        );
     }
     private void createGameOverMenu() {
         gameOverMenu = new VBox(20);
@@ -115,8 +161,10 @@ public class Game extends Application {
                         "-fx-text-fill: white;" +
                         "-fx-font-size: 16px;" +
                         "-fx-padding: 10px 20px;" +
+                        "-fx-min-width: 200px;" +
                         "-fx-cursor: hand"
         );
+
         button.setOnMouseEntered(e ->
                                          button.setStyle(button.getStyle() + ";-fx-background-color: #45a049;"));
         button.setOnMouseExited(e ->
@@ -125,21 +173,86 @@ public class Game extends Application {
 
     private void setupInputHandlers() {
         canvas.setOnKeyPressed(e -> {
-            this.keys.put(e.getCode(), true);
+            keys.put(e.getCode(), true);
             if (e.getCode() == KeyCode.ESCAPE) {
-                System.exit(0);
+                togglePause();
             }
         });
-        canvas.setOnKeyReleased(e -> this.keys.put(e.getCode(), false));
-        canvas.setOnMousePressed(e -> this.player.shoot(e.getX(), e.getY()));
-        canvas.setOnMouseDragged(e -> this.player.shoot(e.getX(), e.getY()));
+        canvas.setOnKeyReleased(e -> keys.put(e.getCode(), false));
+        canvas.setOnMousePressed(e -> {
+            if (!isPaused) {
+                player.shoot(e.getX(), e.getY());
+            }
+        });
+        canvas.setOnMouseDragged(e -> {
+            if (!isPaused) {
+                player.shoot(e.getX(), e.getY());
+            }
+        });
+    }
+    private void togglePause() {
+        isPaused = !isPaused;
+        if (isPaused) {
+            pauseGame();
+        } else {
+            resumeGame();
+        }
+    }
+    private void pauseGame() {
+        gameLoop.stop();
+        root.getChildren().add(pauseMenu);
+    }
+    private void resumeGame() {
+        root.getChildren().remove(pauseMenu);
+        gameLoop.play();
+        isPaused = false;
+        canvas.requestFocus();
+    }
+    private void openSettings() {
+        gameLoop.stop(); // Pause the game while in settings
+        Settings settings = new Settings(primaryStage, this);
+        settings.show();
+    }
+
+    public void resizeGame(int width, int height) {
+        // Resize the canvas
+        canvas.setWidth(width);
+        canvas.setHeight(height);
+
+        // Update pause menu size if it exists
+        if (pauseMenu != null) {
+            pauseMenu.setPrefWidth(width);
+            pauseMenu.setPrefHeight(height);
+        }
+
+        // Update game over menu size if it exists
+        if (gameOverMenu != null) {
+            gameOverMenu.setPrefWidth(width);
+            gameOverMenu.setPrefHeight(height);
+        }
+
+        // Resume the game
+        if (!isPaused) {
+            gameLoop.play();
+        }
+
+        // Request focus back to the canvas
+        canvas.requestFocus();
+    }
+    private void returnToMainMenu() {
+        gameLoop.stop();
+        try {
+            MainMenu mainMenu = new MainMenu();
+            mainMenu.start(primaryStage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     private void restartGame() {
         gameLoop.stop();
         root.getChildren().remove(gameOverMenu);
         initializeGame();
     }
-
     private void showGameWonScreen() {
         gameLoop.stop();
         root.getChildren().add(gameOverMenu);
@@ -173,6 +286,10 @@ public class Game extends Application {
         spawner.start();
     }
     private void update(GraphicsContext graphicsContext) {
+        if (isPaused) {
+            return;
+        }
+
         // Check for win condition
         if (score >= 20 && !gameWon) {
             gameWon = true;
