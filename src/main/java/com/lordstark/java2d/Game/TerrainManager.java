@@ -13,6 +13,7 @@ public class TerrainManager {
     public static final int WORLD_HEIGHT = 5000;
     private static final int SPAWN_SAFE_ZONE = 200; // No trees within this radius of spawn point
     private static final int HOUSE_SAFE_ZONE = 150; // No trees within this radius of houses
+    private static final int TENT_SAFE_ZONE = 150; // No trees within this radius of houses
     private static final int MAX_TREES = 100;  // Maximum number of trees in the world
 
     private final Map<String, TerrainObject> terrainMap; // Stores tiles with unique keys
@@ -20,6 +21,7 @@ public class TerrainManager {
     private final List<Image> rockImages;
     private Image mainTile; // The main tile image to use as the base layer
     private final List<TerrainObject> staticHouses; // Fixed list of houses
+    private final List<TerrainObject> staticTents;
 
     private final List<TreeObject> trees; // New list for trees
     private final Image treeImage;
@@ -36,6 +38,7 @@ public class TerrainManager {
         this.grassImages = loadImages("Grass");
         this.rockImages = loadImages("Rocks");
         this.staticHouses = initializeStaticHouses(); // Initialize static houses
+        this.staticTents = initializeStaticTents();
 
         this.trees = new ArrayList<>();
         this.treeImage = new Image("file:src/main/resources/Trees/Tree1.png");
@@ -126,6 +129,12 @@ public class TerrainManager {
             if (distance < HOUSE_SAFE_ZONE) return false;
         }
 
+        // Check distance from tents
+        for (TerrainObject tent : staticTents) {
+            double distance = Math.sqrt(Math.pow(x - tent.x(), 2) + Math.pow(y - tent.y(), 2));
+            if (distance < TENT_SAFE_ZONE) return false;
+        }
+
         // Check distance from other trees
         for (TreeObject tree : trees) {
             double distance = Math.sqrt(Math.pow(x - tree.getX(), 2) + Math.pow(y - tree.getY(), 2));
@@ -137,6 +146,16 @@ public class TerrainManager {
 
     private void loadMainTile() {
         mainTile = new Image("file:src/main/resources/tiles/1.png");
+    }
+    private List<TerrainObject> initializeStaticTents() {
+        List<TerrainObject> tents = new ArrayList<>();
+        tents.add(new TerrainObject(-600, -600, new Image("file:src/main/resources/Tents/1.png")));
+        tents.add(new TerrainObject(600, -600, new Image("file:src/main/resources/Tents/2.png")));
+        tents.add(new TerrainObject(-600, 540, new Image("file:src/main/resources/Tents/3.png")));
+        tents.add(new TerrainObject(600, 540, new Image("file:src/main/resources/Tents/4.png")));
+
+        // Add more houses here if needed, ensuring they don’t overlap in position
+        return tents;
     }
 
     // Create fixed house objects with unique positions and images
@@ -231,6 +250,14 @@ public class TerrainManager {
                     house.y() - camera.getOffsetY()
             );
         }
+        // Render static houses with fixed positions
+        for (TerrainObject tent : staticTents) {
+            graphicsContext.drawImage(
+                    tent.image(),
+                    tent.x() - camera.getOffsetX(),
+                    tent.y() - camera.getOffsetY()
+            );
+        }
         // First render all shadows
         for (TreeObject tree : trees) {
             // Calculate shadow position to be at the base of the tree
@@ -300,5 +327,8 @@ public class TerrainManager {
 
     public static double getActualSpriteHeight(double height) {
         return height * 0.3; // Adjust this multiplier to fine-tune sprite collision height
+    }
+    public List<TerrainObject> getTents() {
+        return staticTents;
     }
 }

@@ -273,13 +273,22 @@ public class Game extends Application {
         Thread spawner = new Thread(() -> {
             try {
                 Random random = new Random();
+                List<TerrainObject> tents = terrainManager.getTents();  // Get the list of tents
                 while (true) {
-                    double x = random.nextDouble()*AppConfig.getWidth();
-                    double y = random.nextDouble()*AppConfig.getHeight();
+                    if (tents.isEmpty()) break;  // Exit if there are no tents
+
+                    // Select a random tent as the spawn point
+                    TerrainObject tent = tents.get(random.nextInt(tents.size()));
+                    double x = tent.x();  // Tent x-coordinate
+                    double y = tent.y();  // Tent y-coordinate
+
+                    // Spawn an enemy at the tent location
                     enemies.add(new Enemy(this.player, x, y, terrainManager));
+
+                    // Wait before spawning the next enemy
                     Thread.sleep(2000);
                 }
-            }catch (InterruptedException ex) {
+            } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
         });
@@ -291,7 +300,7 @@ public class Game extends Application {
         }
 
         // Check for win condition
-        if (score >= 20 && !gameWon) {
+        if (score >= 200 && !gameWon) {
             gameWon = true;
             showGameWonScreen();
             return;
