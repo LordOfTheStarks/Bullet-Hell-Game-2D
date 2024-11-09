@@ -7,13 +7,17 @@ import com.lordstark.java2d.Menu.MainMenu;
 import javafx.animation.KeyFrame;
 import javafx.animation.*;
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -27,34 +31,49 @@ public class Game extends Application {
     private int score = 0;
     private TerrainManager terrainManager;
 
+    private Stage primaryStage;
+    private Timeline gameLoop;
+    private StackPane root;
+    private Canvas canvas;
+    private VBox gameOverMenu;
+    private boolean gameWon = false;
+
     public static void main(String[] args) {
         launch(args);
     }
 
     @Override
     public void start(Stage stage) {
-
-        terrainManager = new TerrainManager();
-
+        this.primaryStage = stage;
         stage.setTitle("Shooter game");
 
-        StackPane pane = new StackPane();
+        initializeGame();
+    }
 
+    private void initializeGame() {
+        // Reset game state
+        score = 0;
+        gameWon = false;
+        enemies.clear();
+        Player.bullets.clear();
+
+        root = new StackPane();
+        terrainManager = new TerrainManager();
         camera = new Camera(0, 0);
 
         // Get width and height from AppConfig
-        Canvas canvas = new Canvas(AppConfig.getWidth(), AppConfig.getHeight());
+        canvas = new Canvas(AppConfig.getWidth(), AppConfig.getHeight());
         canvas.setFocusTraversable(true);
         GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
-        pane.getChildren().add(canvas);
+        root.getChildren().add(canvas);
 
         this.player = new Player(50, 50);
-        this.player.setTerrainManager(terrainManager); // Link player to terrainManager
+        this.player.setTerrainManager(terrainManager);
 
-        Timeline loop = new Timeline(new KeyFrame(Duration.millis(1000.0/60),
-                                                  e -> update(graphicsContext)));
-        loop.setCycleCount(Animation.INDEFINITE);
-        loop.play();
+        gameLoop = new Timeline(new KeyFrame(Duration.millis(1000.0/60),
+                                             e -> update(graphicsContext)));
+        gameLoop.setCycleCount(Animation.INDEFINITE);
+        gameLoop.play();
 
         spawnEnemies();
 
@@ -62,6 +81,49 @@ public class Game extends Application {
             e.setTerrainManager(terrainManager);
         }
 
+        setupInputHandlers();
+
+        Scene scene = new Scene(root, AppConfig.getWidth(), AppConfig.getHeight());
+        primaryStage.setScene(scene);
+        primaryStage.show();
+
+        // Initialize game over menu but don't add it yet
+        createGameOverMenu();
+    }
+    private void createGameOverMenu() {
+        gameOverMenu = new VBox(20);
+        gameOverMenu.setAlignment(Pos.CENTER);
+
+        Text winText = new Text("You Won");
+        winText.setFont(Font.loadFont(Objects.requireNonNull(
+                MainMenu.class.getResource("/joystix-monospace.otf")).toExternalForm(), 40));
+        winText.setFill(Color.WHITE);
+
+        Button replayButton = new Button("Replay");
+        replayButton.setOnAction(e -> restartGame());
+        styleButton(replayButton);
+
+        Button quitButton = new Button("Quit");
+        quitButton.setOnAction(e -> System.exit(0));
+        styleButton(quitButton);
+
+        gameOverMenu.getChildren().addAll(winText, replayButton, quitButton);
+    }
+    private void styleButton(Button button) {
+        button.setStyle(
+                "-fx-background-color: #4CAF50;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 16px;" +
+                        "-fx-padding: 10px 20px;" +
+                        "-fx-cursor: hand"
+        );
+        button.setOnMouseEntered(e ->
+                                         button.setStyle(button.getStyle() + ";-fx-background-color: #45a049;"));
+        button.setOnMouseExited(e ->
+                                        button.setStyle(button.getStyle().replace(";-fx-background-color: #45a049", "")));
+    }
+
+    private void setupInputHandlers() {
         canvas.setOnKeyPressed(e -> {
             this.keys.put(e.getCode(), true);
             if (e.getCode() == KeyCode.ESCAPE) {
@@ -71,11 +133,18 @@ public class Game extends Application {
         canvas.setOnKeyReleased(e -> this.keys.put(e.getCode(), false));
         canvas.setOnMousePressed(e -> this.player.shoot(e.getX(), e.getY()));
         canvas.setOnMouseDragged(e -> this.player.shoot(e.getX(), e.getY()));
-
-        Scene scene = new Scene(pane, AppConfig.getWidth(), AppConfig.getHeight());
-        stage.setScene(scene);
-        stage.show();
     }
+    private void restartGame() {
+        gameLoop.stop();
+        root.getChildren().remove(gameOverMenu);
+        initializeGame();
+    }
+
+    private void showGameWonScreen() {
+        gameLoop.stop();
+        root.getChildren().add(gameOverMenu);
+    }
+
     public static void timerBullet(long time, Runnable r) {
         new Thread(() -> {
             try {
@@ -104,6 +173,13 @@ public class Game extends Application {
         spawner.start();
     }
     private void update(GraphicsContext graphicsContext) {
+        // Check for win condition
+        if (score >= 20 && !gameWon) {
+            gameWon = true;
+            showGameWonScreen();
+            return;
+        }
+
         // Clamp player position to world bounds
         double clampedX = Math.max((double) -TerrainManager.WORLD_WIDTH /2,
                                    Math.min((double) TerrainManager.WORLD_WIDTH /2, player.getX()));
@@ -190,10 +266,14 @@ public class Game extends Application {
         graphicsContext.setStroke(Color.BLACK);
         graphicsContext.strokeRect(50, AppConfig.getHeight()-80, 100, 30);
 
-        //Display SCORE
-        double fontSize = AppConfig.getWidth() * 0.025;
-        graphicsContext.setFont(Font.loadFont(Objects.requireNonNull(MainMenu.class.getResource("/joystix-monospace.otf")).toExternalForm(), fontSize));
+        // Display SCORE - Now using relative positioning
+        double scoreX = AppConfig.getWidth() * 0.02; // 2% from left edge
+        double scoreY = AppConfig.getHeight() * 0.08; // 5% from top
+        double fontSize = AppConfig.getWidth() * 0.025; // Dynamic font size
+
+        graphicsContext.setFont(Font.loadFont(Objects.requireNonNull(
+                MainMenu.class.getResource("/joystix-monospace.otf")).toExternalForm(), fontSize));
         graphicsContext.setFill(Color.BLACK);
-        graphicsContext.fillText("Score: " + score, 10, 20);
+        graphicsContext.fillText("Score: " + score, scoreX, scoreY);
     }
 }
