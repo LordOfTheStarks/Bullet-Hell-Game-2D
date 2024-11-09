@@ -53,7 +53,7 @@ public class MainMenu extends Application {
 
     private void addBackground() {
         ImageView imageView = new ImageView(
-                new Image(getClass().getResource("/5d9ce6c826eac1ebec3d8b65536d3ae1.jpg").toExternalForm()));
+                new Image(getClass().getResource("/MainMenu.jpeg").toExternalForm()));
         imageView.setFitWidth(AppConfig.getWidth());
         imageView.setFitHeight(AppConfig.getHeight());
 
