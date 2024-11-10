@@ -19,6 +19,7 @@ public class TerrainManager {
     private final Map<String, TerrainObject> terrainMap; // Stores tiles with unique keys
     private final List<Image> grassImages;
     private final List<Image> rockImages;
+    private final List<Image> flowerImages;
     private Image mainTile; // The main tile image to use as the base layer
     private final List<TerrainObject> staticHouses; // Fixed list of houses
     private final List<TerrainObject> staticTents;
@@ -29,6 +30,7 @@ public class TerrainManager {
 
     private final List<TerrainObject> grasses;
     private final List<TerrainObject> rocks;
+    private final List<TerrainObject> flowers;
 
     private static final int TILE_SIZE = 30;
     private static final int RADIUS = 10; // Radius around the player for tile generation
@@ -40,11 +42,13 @@ public class TerrainManager {
         this.terrainMap = new HashMap<>();
         this.grassImages = loadImages("Grass");
         this.rockImages = loadImages("Rocks");
+        this.flowerImages = loadImages("Flowers");
         this.staticHouses = initializeStaticHouses(); // Initialize static houses
         this.staticTents = initializeStaticTents();
 
         this.grasses = new ArrayList<>();
         this.rocks = new ArrayList<>();
+        this.flowers = new ArrayList<>();
         this.trees = new ArrayList<>();
         this.treeImage = new Image("file:src/main/resources/Trees/Tree1.png");
         this.treeShadowImage = new Image("file:src/main/resources/Shadows/6.png");
@@ -104,6 +108,7 @@ public class TerrainManager {
 
         int maxGrass = 1000; // Adjust the number as needed
         int maxRocks = 1000; // Adjust the number as needed
+        int maxFlowers = 1000;
 
         // Place grasses randomly within world bounds
         for (int i = 0; i < maxGrass; i++) {
@@ -119,6 +124,13 @@ public class TerrainManager {
             double y = random.nextDouble() * WORLD_HEIGHT - WORLD_HEIGHT / 2.0;
             Image rockImage = randomImage(rockImages);
             rocks.add(new TerrainObject(x, y, rockImage));
+        }
+        // Place rocks randomly within world bounds
+        for (int i = 0; i < maxFlowers; i++) {
+            double x = random.nextDouble() * WORLD_WIDTH - WORLD_WIDTH / 2.0;
+            double y = random.nextDouble() * WORLD_HEIGHT - WORLD_HEIGHT / 2.0;
+            Image flowerImage = randomImage(flowerImages);
+            flowers.add(new TerrainObject(x, y, flowerImage));
         }
     }
     private void initializeTrees() {
@@ -275,6 +287,14 @@ public class TerrainManager {
                     rock.image(),
                     rock.x() - camera.getOffsetX(),
                     rock.y() - camera.getOffsetY()
+            );
+        }
+        // Render pre-generated flowers
+        for (TerrainObject flower : flowers) {
+            graphicsContext.drawImage(
+                    flower.image(),
+                    flower.x() - camera.getOffsetX(),
+                    flower.y() - camera.getOffsetY()
             );
         }
 
