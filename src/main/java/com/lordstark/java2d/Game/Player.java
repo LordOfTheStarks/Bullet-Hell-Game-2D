@@ -32,9 +32,9 @@ public class Player {
     private static final int DAMAGE_ROW = 3, DAMAGE_COLUMNS = 1;
     private static final int DEATH_ROW = 4, DEATH_COLUMNS = 14;
 
-    private static final long IDLE_DURATION = 250;
+    private static final long IDLE_DURATION = 125;
     private static final long WALK_DURATION = 167;
-    private static final long SHOOT_DURATION = 100; // Slightly slower shooting animation
+    private static final long SHOOT_DURATION = 125;
     private static final long DAMAGE_DURATION = 100;
     private static final long DEATH_DURATION = 125;
 

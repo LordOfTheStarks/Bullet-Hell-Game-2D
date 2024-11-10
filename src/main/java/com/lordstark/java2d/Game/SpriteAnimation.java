@@ -38,6 +38,7 @@ public class SpriteAnimation {
         currentFrameIndex = 0; // Reset frame index when switching animation
     }
 
+    // Method to get the current frame for rendering
     public Image getFrame() {
         long now = System.currentTimeMillis();
         if (now - lastFrameTime > frameDuration) {
@@ -47,6 +48,7 @@ public class SpriteAnimation {
         return frames[currentFrameIndex];
     }
 
+    // Method to check if the current frame is the last frame in the animation
     public boolean isLastFrame() {
         return currentFrameIndex == frames.length - 1;
     }

@@ -4,7 +4,7 @@ import javafx.scene.image.Image;
 
 public record TerrainObject(double x, double y, Image image) {
 
-    // Add these methods to get the width and height of the image
+    // Methods to get the width and height of the image
     public double getWidth() {
         return image != null ? image.getWidth() : 0;
     }

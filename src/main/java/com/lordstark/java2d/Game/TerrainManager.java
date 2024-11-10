@@ -8,11 +8,10 @@ import java.util.*;
 
 public class TerrainManager {
 
-    // In TerrainManager.java, add these constants at the top of the class:
-    public static final int WORLD_WIDTH = 3000;  // Adjust these values as needed
+    public static final int WORLD_WIDTH = 3000;  // Adjust these values as needed, but these are optimal
     public static final int WORLD_HEIGHT = 3000;
     private static final int SPAWN_SAFE_ZONE = 200; // No trees within this radius of spawn point
-    private static final int HOUSE_SAFE_ZONE = 150; // No trees within this radius of houses
+    private static final int HOUSE_SAFE_ZONE = 150;
     private static final int TENT_SAFE_ZONE = 150; // No trees within this radius of houses
     private static final int MAX_TREES = 100;  // Maximum number of trees in the world
     private static final double RENDER_BUFFER = 1000.0; // Larger buffer zone for rendering objects
@@ -38,7 +37,7 @@ public class TerrainManager {
     private final List<TerrainObject> bushes;
 
     private static final int TILE_SIZE = 30;
-    private static final int RADIUS = 10; // Radius around the player for tile generation
+    private static final int RADIUS = 10;
     private static final int ROCK_PROBABILITY = 10; // 10% chance of a rock
     private static final int GRASS_PROBABILITY = 30; // 30% chance of grass
     private static final int MIN_TREE_SPACING = 100; // Minimum distance between trees
@@ -50,8 +49,8 @@ public class TerrainManager {
         this.flowerImages = loadImages("Flowers");
         this.bushImages = loadImages("Bushes");
         this.staticHouses = initializeStaticHouses(); // Initialize static houses
-        this.staticTents = initializeStaticTents();
-        this.staticDecors = initializeStaticDecors();
+        this.staticTents = initializeStaticTents(); // Init tents
+        this.staticDecors = initializeStaticDecors(); // Init decors
 
         this.grasses = new ArrayList<>();
         this.rocks = new ArrayList<>();
@@ -73,7 +72,7 @@ public class TerrainManager {
         }
         return images;
     }
-    // Inner class to handle tree and shadow pairing
+    // Class to handle tree and shadow pairing
     private static class TreeObject {
         private final double x, y;
         private final Image treeImage;
@@ -102,9 +101,9 @@ public class TerrainManager {
 
         // Method to get the base collision rectangle
         public double[] getCollisionBounds() {
-            // Collision box at the base of the tree, about 1/3 of the tree's width
+            // Collision box at the base of the tree, this can be modified later but it is okay now
             double collisionWidth = treeWidth * 0.3;
-            double collisionHeight = treeHeight * 1.2; // Small height for base collision
+            double collisionHeight = treeHeight * 1.2;
             double collisionX = x + (treeWidth - collisionWidth) / 2;
             double collisionY = y + treeHeight - collisionHeight;
 
@@ -114,8 +113,9 @@ public class TerrainManager {
     private void initializeGrassAndRocks() {
         Random random = new Random();
 
-        int maxGrass = 1000; // Adjust the number as needed
-        int maxRocks = 500; // Adjust the number as needed
+        //Optimal for no lagging
+        int maxGrass = 1000;
+        int maxRocks = 500;
         int maxFlowers = 1000;
         int maxBushes = 10;
 
@@ -127,6 +127,7 @@ public class TerrainManager {
             grasses.add(new TerrainObject(x, y, grassImage));
         }
 
+        // Place bushes randomly within world bounds
         for (int i = 0; i < maxBushes; i++) {
             double x = random.nextDouble() * WORLD_WIDTH - WORLD_WIDTH / 2.0;
             double y = random.nextDouble() * WORLD_HEIGHT - WORLD_HEIGHT / 2.0;
@@ -141,7 +142,7 @@ public class TerrainManager {
             Image rockImage = randomImage(rockImages);
             rocks.add(new TerrainObject(x, y, rockImage));
         }
-        // Place rocks randomly within world bounds
+        // Place flowers randomly within world bounds
         for (int i = 0; i < maxFlowers; i++) {
             double x = random.nextDouble() * WORLD_WIDTH - WORLD_WIDTH / 2.0;
             double y = random.nextDouble() * WORLD_HEIGHT - WORLD_HEIGHT / 2.0;
@@ -211,7 +212,6 @@ public class TerrainManager {
         tents.add(new TerrainObject(-600, 540, new Image(getClass().getResourceAsStream("/Tents/3.png"))));
         tents.add(new TerrainObject(600, 540, new Image(getClass().getResourceAsStream("/Tents/4.png"))));
 
-        // Add more houses here if needed, ensuring they don’t overlap in position
         return tents;
     }
     private List<TerrainObject> initializeStaticDecors() {
@@ -222,7 +222,6 @@ public class TerrainManager {
         decors.add(new TerrainObject(150, 90, new Image(getClass().getResourceAsStream("/Decor/Lamp4.png"))));
         decors.add(new TerrainObject(45, 20, new Image(getClass().getResourceAsStream("/Decor/Land5.png"))));
 
-        // Add more houses here if needed, ensuring they don’t overlap in position
         return decors;
     }
 
@@ -230,13 +229,12 @@ public class TerrainManager {
     private List<TerrainObject> initializeStaticHouses() {
         List<TerrainObject> houses = new ArrayList<>();
 
-        // Define unique positions and images for each house
+        // Defined unique positions and images for each house
         houses.add(new TerrainObject(-180, -180, new Image(getClass().getResourceAsStream("/Houses/1.png"))));
         houses.add(new TerrainObject(180, -180, new Image(getClass().getResourceAsStream("/Houses/2.png"))));
         houses.add(new TerrainObject(-180, 120, new Image(getClass().getResourceAsStream("/Houses/3.png"))));
         houses.add(new TerrainObject(180, 120, new Image(getClass().getResourceAsStream("/Houses/4.png"))));
 
-        // Add more houses here if needed, ensuring they don’t overlap in position
         return houses;
     }
 
@@ -426,7 +424,7 @@ public class TerrainManager {
     }
     public boolean collidesWithHouse(double x, double y, double width, double height) {
         // Collision offset to make the boundaries tighter
-        double collisionOffset = 10; // Adjust this value to fine-tune the collision boundary
+        double collisionOffset = 10; // Manually adjusted
 
         for (TerrainObject house : staticHouses) {
             // Adjust collision boundaries to be slightly smaller than the actual house image
@@ -442,7 +440,7 @@ public class TerrainManager {
                 return true;
             }
         }
-        // Check tree collisions with improved collision boxes
+        // Check tree collisions
         for (TreeObject tree : trees) {
             double[] bounds = tree.getCollisionBounds();
             double treeX = bounds[0];
@@ -460,13 +458,13 @@ public class TerrainManager {
         return false;
     }
 
-    // Add these helper methods to get actual sprite dimensions
+    // Helper methods for collision detection
     public static double getActualSpriteWidth(double width) {
-        return width * 0.3; // Adjust this multiplier to fine-tune sprite collision width
+        return width * 0.3;
     }
 
     public static double getActualSpriteHeight(double height) {
-        return height * 0.3; // Adjust this multiplier to fine-tune sprite collision height
+        return height * 0.3;
     }
     public List<TerrainObject> getTents() {
         return staticTents;
