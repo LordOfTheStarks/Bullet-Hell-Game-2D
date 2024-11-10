@@ -8,6 +8,7 @@ import com.lordstark.java2d.Menu.Settings;
 import javafx.animation.KeyFrame;
 import javafx.animation.*;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -29,6 +30,7 @@ public class Game extends Application {
     private Player player;
     private final Map<KeyCode, Boolean> keys = new HashMap<>();
     public static List<Enemy> enemies = new ArrayList<>();
+    private int currentTentIndex = 0;
     private int score = 0;
     private TerrainManager terrainManager;
 
@@ -79,6 +81,7 @@ public class Game extends Application {
         gameLoop.setCycleCount(Animation.INDEFINITE);
         gameLoop.play();
 
+        currentTentIndex = 0;
         spawnEnemies();
 
         for (Enemy e : enemies) {
@@ -282,18 +285,27 @@ public class Game extends Application {
     public void spawnEnemies() {
         Thread spawner = new Thread(() -> {
             try {
-                Random random = new Random();
-                List<TerrainObject> tents = terrainManager.getTents();  // Get the list of tents
+                List<TerrainObject> tents = terrainManager.getTents();
+
                 while (true) {
-                    if (tents.isEmpty()) break;  // Exit if there are no tents
+                    if (tents.isEmpty()) break;
 
-                    // Select a random tent as the spawn point
-                    TerrainObject tent = tents.get(random.nextInt(tents.size()));
-                    double x = tent.x();  // Tent x-coordinate
-                    double y = tent.y();  // Tent y-coordinate
+                    // Get the next tent in sequence
+                    TerrainObject tent = tents.get(currentTentIndex);
+                    double x = tent.x();
+                    double y = tent.y();
 
-                    // Spawn an enemy at the tent location
-                    enemies.add(new Enemy(this.player, x, y, terrainManager));
+                    // Add small random offset to prevent enemies from spawning at exact same spot
+                    double offsetX = (Math.random() - 0.5) * 20; // +/- 10 pixels
+                    double offsetY = (Math.random() - 0.5) * 20;
+
+                    // Spawn an enemy at the tent location with offset
+                    Platform.runLater(() -> {
+                        enemies.add(new Enemy(this.player, x + offsetX, y + offsetY, terrainManager));
+                    });
+
+                    // Move to next tent
+                    currentTentIndex = (currentTentIndex + 1) % tents.size();
 
                     // Wait before spawning the next enemy
                     Thread.sleep(2000);
