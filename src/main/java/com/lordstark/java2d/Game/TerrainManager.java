@@ -15,6 +15,8 @@ public class TerrainManager {
     private static final int HOUSE_SAFE_ZONE = 150; // No trees within this radius of houses
     private static final int TENT_SAFE_ZONE = 150; // No trees within this radius of houses
     private static final int MAX_TREES = 100;  // Maximum number of trees in the world
+    private static final double RENDER_BUFFER = 1000.0; // Larger buffer zone for rendering objects
+    private static final double OBJECT_CULLING_DISTANCE = 1500.0; // Distance beyond which objects are culled
 
     private final Map<String, TerrainObject> terrainMap; // Stores tiles with unique keys
     private final List<Image> grassImages;
@@ -288,93 +290,135 @@ public class TerrainManager {
     public void render(GraphicsContext graphicsContext, Camera camera) {
         double canvasWidth = AppConfig.getWidth();
         double canvasHeight = AppConfig.getHeight();
-        double offsetX = camera.getOffsetX() % TILE_SIZE;
-        double offsetY = camera.getOffsetY() % TILE_SIZE;
 
-        for (int x = 0; x <= canvasWidth; x += TILE_SIZE) {
-            for (int y = 0; y <= canvasHeight; y += TILE_SIZE) {
-                graphicsContext.drawImage(mainTile, x - offsetX, y - offsetY);
+        // Calculate the number of tiles needed to cover the screen plus extra tiles for smooth scrolling
+        int tilesX = (int) (canvasWidth / TILE_SIZE) + 2;
+        int tilesY = (int) (canvasHeight / TILE_SIZE) + 2;
+
+        // Calculate the starting position for tile rendering
+        double startX = -TILE_SIZE + (camera.getOffsetX() % TILE_SIZE);
+        double startY = -TILE_SIZE + (camera.getOffsetY() % TILE_SIZE);
+
+        // Render base tiles with proper alignment
+        for (int x = 0; x <= tilesX; x++) {
+            for (int y = 0; y <= tilesY; y++) {
+                graphicsContext.drawImage(
+                        mainTile,
+                        startX + (x * TILE_SIZE),
+                        startY + (y * TILE_SIZE)
+                );
             }
         }
 
-        // Render pre-generated grasses
+        // Calculate visible area bounds with larger buffer
+        double visibleLeft = camera.getOffsetX() - RENDER_BUFFER;
+        double visibleTop = camera.getOffsetY() - RENDER_BUFFER;
+        double visibleRight = camera.getOffsetX() + canvasWidth + RENDER_BUFFER;
+        double visibleBottom = camera.getOffsetY() + canvasHeight + RENDER_BUFFER;
+
+        // Render objects with optimized culling
+        renderTerrainObjects(graphicsContext, camera, visibleLeft, visibleTop, visibleRight, visibleBottom);
+    }
+    private void renderTerrainObjects(GraphicsContext graphicsContext, Camera camera,
+                                      double visibleLeft, double visibleTop,
+                                      double visibleRight, double visibleBottom) {
+        // Render grass
         for (TerrainObject grass : grasses) {
-            graphicsContext.drawImage(
-                    grass.image(),
-                    grass.x() - camera.getOffsetX(),
-                    grass.y() - camera.getOffsetY()
-            );
+            if (isInVisibleArea(grass.x(), grass.y(), visibleLeft, visibleTop, visibleRight, visibleBottom)) {
+                renderObject(graphicsContext, camera, grass);
+            }
         }
+
+        // Render bushes
         for (TerrainObject bush : bushes) {
-            graphicsContext.drawImage(
-                    bush.image(),
-                    bush.x() - camera.getOffsetX(),
-                    bush.y() - camera.getOffsetY()
-            );
+            if (isInVisibleArea(bush.x(), bush.y(), visibleLeft, visibleTop, visibleRight, visibleBottom)) {
+                renderObject(graphicsContext, camera, bush);
+            }
         }
 
-        // Render pre-generated rocks
+        // Render rocks
         for (TerrainObject rock : rocks) {
-            graphicsContext.drawImage(
-                    rock.image(),
-                    rock.x() - camera.getOffsetX(),
-                    rock.y() - camera.getOffsetY()
-            );
+            if (isInVisibleArea(rock.x(), rock.y(), visibleLeft, visibleTop, visibleRight, visibleBottom)) {
+                renderObject(graphicsContext, camera, rock);
+            }
         }
-        // Render pre-generated flowers
+
+        // Render flowers
         for (TerrainObject flower : flowers) {
-            graphicsContext.drawImage(
-                    flower.image(),
-                    flower.x() - camera.getOffsetX(),
-                    flower.y() - camera.getOffsetY()
-            );
+            if (isInVisibleArea(flower.x(), flower.y(), visibleLeft, visibleTop, visibleRight, visibleBottom)) {
+                renderObject(graphicsContext, camera, flower);
+            }
         }
 
-        // Render static houses with fixed positions
+        // Render static structures
+        renderStaticStructures(graphicsContext, camera, visibleLeft, visibleTop, visibleRight, visibleBottom);
+
+        // Render trees with shadows
+        for (TreeObject tree : trees) {
+            if (isInVisibleArea(tree.getX(), tree.getY(), visibleLeft, visibleTop, visibleRight, visibleBottom)) {
+                // Draw shadow first
+                double shadowX = tree.getX() + (tree.treeWidth - tree.shadowWidth) / 2;
+                double shadowY = tree.getY() + tree.treeHeight - tree.shadowHeight / 2;
+
+                graphicsContext.drawImage(
+                        tree.getShadowImage(),
+                        shadowX - camera.getOffsetX(),
+                        shadowY - camera.getOffsetY()
+                );
+
+                // Draw tree
+                graphicsContext.drawImage(
+                        tree.getTreeImage(),
+                        tree.getX() - camera.getOffsetX(),
+                        tree.getY() - camera.getOffsetY()
+                );
+            }
+        }
+    }
+    private void renderStaticStructures(GraphicsContext graphicsContext, Camera camera,
+                                        double visibleLeft, double visibleTop,
+                                        double visibleRight, double visibleBottom) {
+        // Render houses
         for (TerrainObject house : staticHouses) {
-            graphicsContext.drawImage(
-                    house.image(),
-                    house.x() - camera.getOffsetX(),
-                    house.y() - camera.getOffsetY()
-            );
+            if (isInVisibleArea(house.x(), house.y(), visibleLeft, visibleTop, visibleRight, visibleBottom)) {
+                renderObject(graphicsContext, camera, house);
+            }
         }
-        // Render static houses with fixed positions
+
+        // Render tents
         for (TerrainObject tent : staticTents) {
-            graphicsContext.drawImage(
-                    tent.image(),
-                    tent.x() - camera.getOffsetX(),
-                    tent.y() - camera.getOffsetY()
-            );
+            if (isInVisibleArea(tent.x(), tent.y(), visibleLeft, visibleTop, visibleRight, visibleBottom)) {
+                renderObject(graphicsContext, camera, tent);
+            }
         }
-        // Render static houses with fixed positions
+
+        // Render decor
         for (TerrainObject decor : staticDecors) {
-            graphicsContext.drawImage(
-                    decor.image(),
-                    decor.x() - camera.getOffsetX(),
-                    decor.y() - camera.getOffsetY()
-            );
+            if (isInVisibleArea(decor.x(), decor.y(), visibleLeft, visibleTop, visibleRight, visibleBottom)) {
+                renderObject(graphicsContext, camera, decor);
+            }
         }
-        // First render all shadows
-        for (TreeObject tree : trees) {
-            // Calculate shadow position to be at the base of the tree
-            double shadowX = tree.getX() + (tree.treeWidth - tree.shadowWidth) / 2;
-            double shadowY = tree.getY() + tree.treeHeight - tree.shadowHeight / 2;
+    }
 
-            graphicsContext.drawImage(
-                    tree.getShadowImage(),
-                    shadowX - camera.getOffsetX(),
-                    shadowY - camera.getOffsetY()
-            );
+    private void renderObject(GraphicsContext graphicsContext, Camera camera, TerrainObject object) {
+        graphicsContext.drawImage(
+                object.image(),
+                object.x() - camera.getOffsetX(),
+                object.y() - camera.getOffsetY()
+        );
+    }
+
+    // Updated visibility check with distance-based culling
+    private boolean isInVisibleArea(double x, double y, double left, double top, double right, double bottom) {
+        // Basic bounds check
+        if (x < left - OBJECT_CULLING_DISTANCE || x > right + OBJECT_CULLING_DISTANCE ||
+                y < top - OBJECT_CULLING_DISTANCE || y > bottom + OBJECT_CULLING_DISTANCE) {
+            return false;
         }
 
-        // Then render all trees
-        for (TreeObject tree : trees) {
-            graphicsContext.drawImage(
-                    tree.getTreeImage(),
-                    tree.getX() - camera.getOffsetX(),
-                    tree.getY() - camera.getOffsetY()
-            );
-        }
+        // Additional world bounds check
+        return x >= -WORLD_WIDTH/2 && x <= WORLD_WIDTH/2 &&
+                y >= -WORLD_HEIGHT/2 && y <= WORLD_HEIGHT/2;
     }
 
     public Image getMainTile() {

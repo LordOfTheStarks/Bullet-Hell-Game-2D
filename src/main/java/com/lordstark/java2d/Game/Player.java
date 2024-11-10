@@ -9,12 +9,16 @@ public class Player {
     public static List<Bullet> bullets = new ArrayList<>();
     private static final double WIDTH = 70;
     private static final double HEIGHT = 70;
-    private boolean shooting = false, damage = false, isDead = false;
+    private boolean shooting = false, damage = false, isDead = false, isMoving = false;
+    private long lastMoveTime;
+    private static final long MOVE_THRESHOLD = 50;
     private boolean deathAnimationComplete = false;
     private int hp = 100;
     private final SpriteAnimation spriteAnimation;
     private boolean facingLeft = false;
     private TerrainManager terrainManager;
+
+
 
     private Image spriteSheet;
     private final Image sideSpriteSheet;
@@ -59,7 +63,8 @@ public class Player {
     }
 
     private void setWalkAnimation() {
-        spriteAnimation.setAnimationRow(spriteSheet, WALK_ROW, WALK_COLUMNS, WALK_DURATION);
+        // Slower walk animation (increased duration)
+        spriteAnimation.setAnimationRow(spriteSheet, WALK_ROW, WALK_COLUMNS, 200); // Adjusted from 167 to 200
     }
 
     private void setShootAnimation() {
@@ -109,6 +114,13 @@ public class Player {
         if (isDead && spriteAnimation.isLastFrame()) {
             // Stop rendering if death animation is complete
             return;
+        }
+        // Update animation state if player has stopped moving
+        if (isMoving && System.currentTimeMillis() - lastMoveTime > MOVE_THRESHOLD) {
+            isMoving = false;
+            if (!shooting && !damage) {
+                setIdleAnimation();
+            }
         }
 
         Image currentFrame = spriteAnimation.getFrame();
@@ -171,9 +183,17 @@ public class Player {
         }
 
         if (moved) {
-            setWalkAnimation();
-        } else {
-            setIdleAnimation();
+            isMoving = true;
+            lastMoveTime = System.currentTimeMillis();
+            if (!shooting && !damage) {
+                setWalkAnimation();
+            }
+        } else if (isMoving && System.currentTimeMillis() - lastMoveTime > MOVE_THRESHOLD) {
+            // Player has stopped moving
+            isMoving = false;
+            if (!shooting && !damage) {
+                setIdleAnimation();
+            }
         }
     }
     public void shoot(double mouseX, double mouseY) {
