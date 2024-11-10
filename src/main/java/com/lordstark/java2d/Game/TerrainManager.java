@@ -220,7 +220,7 @@ public class TerrainManager {
         decors.add(new TerrainObject(150, -70, new Image(getClass().getResourceAsStream("/Decor/Lamp2.png"))));
         decors.add(new TerrainObject(-40, 80, new Image(getClass().getResourceAsStream("/Decor/Lamp3.png"))));
         decors.add(new TerrainObject(150, 90, new Image(getClass().getResourceAsStream("/Decor/Lamp4.png"))));
-        decors.add(new TerrainObject(55, 94, new Image(getClass().getResourceAsStream("/Decor/Land5.png"))));
+        decors.add(new TerrainObject(45, 20, new Image(getClass().getResourceAsStream("/Decor/Land5.png"))));
 
         // Add more houses here if needed, ensuring they don’t overlap in position
         return decors;

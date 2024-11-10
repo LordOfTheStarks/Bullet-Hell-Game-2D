@@ -5,35 +5,36 @@ import javafx.scene.image.Image;
 import java.util.*;
 
 public class Player {
-    private double x, y;
-    public static List<Bullet> bullets = new ArrayList<>();
-    private static final double WIDTH = 70;
-    private static final double HEIGHT = 70;
+    private double x, y; // Position for player
+    public static List<Bullet> bullets = new ArrayList<>(); // List of bullets fired
+    private static final double WIDTH = 70; // WIDTH of player
+    private static final double HEIGHT = 70; // HEIGHT of player and these are optimal
     private boolean shooting = false, damage = false, isDead = false, isMoving = false;
-    private long lastMoveTime;
+    private long lastMoveTime; // Time of the last movement
     private static final long MOVE_THRESHOLD = 50;
-    private boolean deathAnimationComplete = false;
-    private int hp = 100;
-    private final SpriteAnimation spriteAnimation;
-    private boolean facingLeft = false;
-    private TerrainManager terrainManager;
+    private boolean deathAnimationComplete = false; // Flag to check if the death animation is complete
+    private int hp = 100; // Player's health
+    private final SpriteAnimation spriteAnimation; // Manages the sprite animation
+    private boolean facingLeft = false; // Tracks if the player is facing left
+    private TerrainManager terrainManager; // Used to handle collisions with the terrain
 
 
 
-    private Image spriteSheet;
+    private Image spriteSheet; // Current sprite sheet
     private final Image sideSpriteSheet;
     private final Image frontSpriteSheet;
     private final Image backSpriteSheet;
 
+    // Animation settings for different actions (idle, walking, shooting, etc.), these are precise
     private static final int IDLE_ROW = 0, IDLE_COLUMNS = 6;
     private static final int WALK_ROW = 1, WALK_COLUMNS = 8;
     private static final int SHOOT_ROW = 2, SHOOT_COLUMNS = 6;
     private static final int DAMAGE_ROW = 3, DAMAGE_COLUMNS = 1;
     private static final int DEATH_ROW = 4, DEATH_COLUMNS = 14;
 
-    private static final long IDLE_DURATION = 250;  // Slower idle animation
-    private static final long WALK_DURATION = 167;  // Adjusted walk speed
-    private static final long SHOOT_DURATION = 100; // Slightly slower shooting
+    private static final long IDLE_DURATION = 250;
+    private static final long WALK_DURATION = 167;
+    private static final long SHOOT_DURATION = 100; // Slightly slower shooting animation
     private static final long DAMAGE_DURATION = 100;
     private static final long DEATH_DURATION = 125;
 
@@ -44,8 +45,8 @@ public class Player {
         this.frontSpriteSheet = new Image(getClass().getResourceAsStream("/Player/Player_Front_Sheet.png"));
         this.backSpriteSheet = new Image(getClass().getResourceAsStream("/Player/Player_Back_Sheet.png"));
 
-        this.spriteSheet = sideSpriteSheet;
-        this.spriteAnimation = new SpriteAnimation(48, 44, 12);
+        this.spriteSheet = sideSpriteSheet; // Default sprite is side view
+        this.spriteAnimation = new SpriteAnimation(48, 44, 12); //This is precise Initialize the animation with frame size and rate
         setIdleAnimation(); // Start with idle animation
     }
 
@@ -63,8 +64,7 @@ public class Player {
     }
 
     private void setWalkAnimation() {
-        // Slower walk animation (increased duration)
-        spriteAnimation.setAnimationRow(spriteSheet, WALK_ROW, WALK_COLUMNS, 200); // Adjusted from 167 to 200
+        spriteAnimation.setAnimationRow(spriteSheet, WALK_ROW, WALK_COLUMNS, WALK_DURATION);
     }
 
     private void setShootAnimation() {
@@ -79,13 +79,14 @@ public class Player {
         spriteAnimation.setAnimationRow(spriteSheet, DEATH_ROW, DEATH_COLUMNS, DEATH_DURATION);
     }
 
+    // Method to handle the player taking damage
     public void takeDamage(int dmg) {
         if (damage || isDead) return;
         this.hp -= dmg;
         damage = true;
 
         if (this.hp <= 0) {
-            death(); // Trigger death animation if health is depleted
+            death(); // Trigger death animation if health is finished
         } else {
             setDamageAnimation();
             Game.timerBullet(150, () -> {
@@ -94,6 +95,7 @@ public class Player {
             });
         }
     }
+    // Check if the player is dead
     public boolean isDead() {
         return isDead;
     }
@@ -102,6 +104,7 @@ public class Player {
         return deathAnimationComplete;
     }
 
+    // Handle the player's death (trigger death animation)
     public void death() {
         isDead = true;
         setDeathAnimation();
@@ -123,6 +126,7 @@ public class Player {
             }
         }
 
+        // Flip the sprite horizontally if the player is facing left
         Image currentFrame = spriteAnimation.getFrame();
         graphicsContext.save();
         if (facingLeft) {
@@ -137,6 +141,7 @@ public class Player {
             bullet.render(graphicsContext, camera);
         }
     }
+    // Method to move the player
     public void move(double dx, double dy) {
         if (isDead) return;
 
@@ -151,7 +156,7 @@ public class Player {
         double offsetX = (WIDTH - collisionWidth) / 2;
         double offsetY = (HEIGHT - collisionHeight) / 2;
 
-        // Try moving on each axis separately to allow sliding along walls
+        // Check for collisions and move along each axis if no collision
         if (dx != 0) {
             if (!terrainManager.collidesWithHouse(newX + offsetX, y + offsetY,
                                                   collisionWidth, collisionHeight)) {
@@ -169,7 +174,7 @@ public class Player {
             }
         }
 
-        // Rest of the movement code remains the same
+        // Set the appropriate sprite based on movement direction
         if (dx < 0) {
             facingLeft = true;
             this.spriteSheet = sideSpriteSheet;
@@ -182,6 +187,7 @@ public class Player {
             this.spriteSheet = frontSpriteSheet;
         }
 
+        // If the player moved, update animation and state
         if (moved) {
             isMoving = true;
             lastMoveTime = System.currentTimeMillis();
@@ -196,6 +202,7 @@ public class Player {
             }
         }
     }
+    // Method for the player to shoot a bullet
     public void shoot(double mouseX, double mouseY) {
         if (shooting || isDead) return;
         shooting = true;
@@ -205,7 +212,7 @@ public class Player {
         double worldMouseY = mouseY + Game.camera.getOffsetY();
         double angle = Math.atan2(worldMouseY - this.y, worldMouseX - this.x);
 
-        // Set appropriate sprite direction
+        // Sets appropriate sprite direction
         if (angle < -Math.PI / 4 && angle > -3 * Math.PI / 4) {
             this.spriteSheet = backSpriteSheet; // Shooting north
         } else if (angle > Math.PI / 4 && angle < 3 * Math.PI / 4) {
@@ -225,10 +232,11 @@ public class Player {
             setIdleAnimation();
         });
     }
+    // Set the terrain manager for collision detection
     public void setTerrainManager(TerrainManager terrainManager) {
         this.terrainManager = terrainManager;
     }
-    // Add to Player.java:
+
     public void setPosition(double x, double y) {
         this.x = x;
         this.y = y;

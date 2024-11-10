@@ -25,23 +25,24 @@ import javafx.util.Duration;
 
 public class Game extends Application {
 
+    // Game objects and some variables
     public static Camera camera;
-    private static final double SPEED = 8;
+    private static final double SPEED = 6; // Speed of the player, it is optimal
     private Player player;
     private final Map<KeyCode, Boolean> keys = new HashMap<>();
-    public static List<Enemy> enemies = new ArrayList<>();
-    private int currentTentIndex = 0;
-    private int score = 0;
+    public static List<Enemy> enemies = new ArrayList<>(); // List of enemies
+    private int currentTentIndex = 0; // For tent locations
+    private int score = 0; // Player starting score
     private TerrainManager terrainManager;
 
-    private Stage primaryStage;
-    private Timeline gameLoop;
-    private StackPane root;
-    private Canvas canvas;
-    private VBox gameOverMenu;
-    private VBox pauseMenu;
-    private boolean gameWon = false;
-    private boolean isPaused = false;
+    private Stage primaryStage; // Main stage
+    private Timeline gameLoop; // Game loop
+    private StackPane root; // Root layout
+    private Canvas canvas; // Canvas to draw the game
+    private VBox gameOverMenu; // Game over menu layout
+    private VBox pauseMenu; // Pause menu layout
+    private boolean gameWon = false; // for Win condition
+    private boolean isPaused = false; // for paused condition
 
     public static void main(String[] args) {
         launch(args);
@@ -50,9 +51,9 @@ public class Game extends Application {
     @Override
     public void start(Stage stage) {
         this.primaryStage = stage;
-        stage.setTitle("Shooter game");
+        stage.setTitle("Shooter game"); // Title of the game window
 
-        initializeGame();
+        initializeGame(); // initialize the game's compononents
     }
 
     private void initializeGame() {
@@ -60,12 +61,12 @@ public class Game extends Application {
         score = 0;
         gameWon = false;
         isPaused = false;
-        enemies.clear();
-        Player.bullets.clear();
+        enemies.clear(); // Clear enemies
+        Player.bullets.clear(); // Clear bullets
 
-        root = new StackPane();
+        root = new StackPane(); // Create root layout
         terrainManager = new TerrainManager();
-        camera = new Camera(0, 0);
+        camera = new Camera(0, 0); // Init camera
 
         // Get width and height from AppConfig
         canvas = new Canvas(AppConfig.getWidth(), AppConfig.getHeight());
@@ -73,23 +74,24 @@ public class Game extends Application {
         GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
         root.getChildren().add(canvas);
 
-        this.player = new Player(50, 50);
+        this.player = new Player(40, -20); // Create the player at this position, manually arranged
         this.player.setTerrainManager(terrainManager);
 
         gameLoop = new Timeline(new KeyFrame(Duration.millis(1000.0/60),
                                              e -> update(graphicsContext)));
-        gameLoop.setCycleCount(Animation.INDEFINITE);
-        gameLoop.play();
+        gameLoop.setCycleCount(Animation.INDEFINITE); // Infinite loop
+        gameLoop.play(); // Start the game loop
 
-        currentTentIndex = 0;
-        spawnEnemies();
+        currentTentIndex = 0; // Reset tent index
+        spawnEnemies(); // Start enemy spawning
 
         for (Enemy e : enemies) {
             e.setTerrainManager(terrainManager);
         }
 
-        setupInputHandlers();
+        setupInputHandlers(); // Set up key and mouse input handlers
 
+        // Set up scene and show the stage
         Scene scene = new Scene(root, AppConfig.getWidth(), AppConfig.getHeight());
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -98,6 +100,7 @@ public class Game extends Application {
         createGameOverMenu();
         createPauseMenu();
     }
+    // Create the pause menu layout with buttons for various actions
     private void createPauseMenu() {
         pauseMenu = new VBox(20);
         pauseMenu.setAlignment(Pos.CENTER);
@@ -139,6 +142,7 @@ public class Game extends Application {
                 quitButton
         );
     }
+    // Create the game over menu layout with options to replay or quit
     private void createGameOverMenu() {
         gameOverMenu = new VBox(20);
         gameOverMenu.setAlignment(Pos.CENTER);
@@ -153,6 +157,7 @@ public class Game extends Application {
 
         gameOverMenu.getChildren().addAll(replayButton, quitButton);
     }
+    // Helper method to style buttons in menus
     private void styleButton(Button button) {
         button.setStyle(
                 "-fx-background-color: #4CAF50;" +
@@ -168,6 +173,7 @@ public class Game extends Application {
         button.setOnMouseExited(e ->
                                         button.setStyle(button.getStyle().replace(";-fx-background-color: #45a049", "")));
     }
+    // Handle game over state and display the corresponding message
     private void handleGameOver() {
         gameLoop.stop();
 
@@ -184,6 +190,7 @@ public class Game extends Application {
         root.getChildren().add(gameOverMenu);
     }
 
+    // Set up input handlers for key and mouse actions
     private void setupInputHandlers() {
         canvas.setOnKeyPressed(e -> {
             keys.put(e.getCode(), true);
@@ -203,6 +210,7 @@ public class Game extends Application {
             }
         });
     }
+    // Toggle the pause state of the game
     private void togglePause() {
         isPaused = !isPaused;
         if (isPaused) {
@@ -211,22 +219,26 @@ public class Game extends Application {
             resumeGame();
         }
     }
+    // Pause the game by stopping the game loop and showing the pause menu
     private void pauseGame() {
         gameLoop.stop();
         root.getChildren().add(pauseMenu);
     }
+    // Resume the game
     private void resumeGame() {
         root.getChildren().remove(pauseMenu);
         gameLoop.play();
         isPaused = false;
         canvas.requestFocus();
     }
+    // Opens settings in menus
     private void openSettings() {
         gameLoop.stop(); // Pause the game while in settings
         Settings settings = new Settings(primaryStage, this);
         settings.show();
     }
 
+    // Resizes screen according to the choice in settings
     public void resizeGame(int width, int height) {
         // Resize the canvas
         canvas.setWidth(width);
@@ -266,11 +278,8 @@ public class Game extends Application {
         root.getChildren().remove(gameOverMenu);
         initializeGame();
     }
-    private void showGameWonScreen() {
-        gameLoop.stop();
-        root.getChildren().add(gameOverMenu);
-    }
 
+    // Timer on bullets
     public static void timerBullet(long time, Runnable r) {
         new Thread(() -> {
             try {
@@ -282,6 +291,7 @@ public class Game extends Application {
         }).start();
     }
 
+    // Spawn new enemies in the game on tents specifically
     public void spawnEnemies() {
         Thread spawner = new Thread(() -> {
             try {
@@ -316,6 +326,7 @@ public class Game extends Application {
         });
         spawner.start();
     }
+    // Updates game according to what happens
     private void update(GraphicsContext graphicsContext) {
         if (isPaused) {
             return;
@@ -414,15 +425,16 @@ public class Game extends Application {
         if (this.keys.getOrDefault(KeyCode.D, false)){
             this.player.move(SPEED, 0);
         }
+
         //DRAWS HP BAR
         graphicsContext.setFill(Color.GREEN);
         graphicsContext.fillRect(50, AppConfig.getHeight()-80, 100*(this.player.getHp()/100.0), 30);
         graphicsContext.setStroke(Color.BLACK);
         graphicsContext.strokeRect(50, AppConfig.getHeight()-80, 100, 30);
 
-        // Display SCORE - Now using relative positioning
+        // Display SCORE DYNAMICALLY
         double scoreX = AppConfig.getWidth() * 0.02; // 2% from left edge
-        double scoreY = AppConfig.getHeight() * 0.08; // 5% from top
+        double scoreY = AppConfig.getHeight() * 0.08; // 8% from top
         double fontSize = AppConfig.getWidth() * 0.025; // Dynamic font size
 
         graphicsContext.setFont(Font.loadFont(Objects.requireNonNull(

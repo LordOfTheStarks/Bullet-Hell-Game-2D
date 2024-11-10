@@ -16,10 +16,10 @@ public class Camera {
         this.offsetY = player.getY() - (double) AppConfig.getHeight() / 2;
     }
 
+    // Get offsets X AND Y
     public double getOffsetX() {
         return offsetX;
     }
-
     public double getOffsetY() {
         return offsetY;
     }
