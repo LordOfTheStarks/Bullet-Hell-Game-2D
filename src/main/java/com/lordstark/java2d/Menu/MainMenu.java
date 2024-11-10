@@ -68,7 +68,7 @@ public class MainMenu extends Application {
         menuData.forEach(data -> {
             MenuItem item = new MenuItem(data.getKey());
             item.setOnAction(data.getValue());
-            item.setTranslateX(0); // Start at natural position
+            item.setTranslateX(0);
             menuBox.getChildren().addAll(item);
         });
 

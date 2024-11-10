@@ -99,7 +99,6 @@ public class Settings {
                     primaryStage.setX((screenBounds.getWidth() - width) / 2);
                     primaryStage.setY((screenBounds.getHeight() - height) / 2);
 
-                    // Recreate the content based on where we came from
                     if (isFromGame) {
                         game.resizeGame(width, height);
                     } else {

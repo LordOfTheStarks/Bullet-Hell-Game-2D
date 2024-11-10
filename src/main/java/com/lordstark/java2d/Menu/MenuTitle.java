@@ -27,7 +27,4 @@ public class MenuTitle extends Pane {
     public double getTitleWidth() {
         return text.getLayoutBounds().getWidth();
     }
-    public double getTitleHeight() {
-        return text.getLayoutBounds().getHeight();
-    }
 }
