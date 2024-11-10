@@ -10,6 +10,7 @@ public class Player {
     private static final double WIDTH = 70;
     private static final double HEIGHT = 70;
     private boolean shooting = false, damage = false, isDead = false;
+    private boolean deathAnimationComplete = false;
     private int hp = 100;
     private final SpriteAnimation spriteAnimation;
     private boolean facingLeft = false;
@@ -88,9 +89,21 @@ public class Player {
             });
         }
     }
+    public boolean isDead() {
+        return isDead;
+    }
+
+    public boolean isDeathAnimationComplete() {
+        return deathAnimationComplete;
+    }
+
     public void death() {
         isDead = true;
         setDeathAnimation();
+        // Set deathAnimationComplete when animation finishes
+        Game.timerBullet(DEATH_DURATION * DEATH_COLUMNS, () -> {
+            deathAnimationComplete = true;
+        });
     }
     public void render(GraphicsContext graphicsContext, Camera camera) {
         if (isDead && spriteAnimation.isLastFrame()) {

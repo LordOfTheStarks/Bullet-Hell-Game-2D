@@ -140,11 +140,6 @@ public class Game extends Application {
         gameOverMenu = new VBox(20);
         gameOverMenu.setAlignment(Pos.CENTER);
 
-        Text winText = new Text("You Won");
-        winText.setFont(Font.loadFont(Objects.requireNonNull(
-                MainMenu.class.getResource("/joystix-monospace.otf")).toExternalForm(), 40));
-        winText.setFill(Color.WHITE);
-
         Button replayButton = new Button("Replay");
         replayButton.setOnAction(e -> restartGame());
         styleButton(replayButton);
@@ -153,7 +148,7 @@ public class Game extends Application {
         quitButton.setOnAction(e -> System.exit(0));
         styleButton(quitButton);
 
-        gameOverMenu.getChildren().addAll(winText, replayButton, quitButton);
+        gameOverMenu.getChildren().addAll(replayButton, quitButton);
     }
     private void styleButton(Button button) {
         button.setStyle(
@@ -169,6 +164,21 @@ public class Game extends Application {
                                          button.setStyle(button.getStyle() + ";-fx-background-color: #45a049;"));
         button.setOnMouseExited(e ->
                                         button.setStyle(button.getStyle().replace(";-fx-background-color: #45a049", "")));
+    }
+    private void handleGameOver() {
+        gameLoop.stop();
+
+        // Create the text based on current game state
+        Text gameOverText = new Text(gameWon ? "You Won" : "You Lost");
+        gameOverText.setFont(Font.loadFont(Objects.requireNonNull(
+                MainMenu.class.getResource("/joystix-monospace.otf")).toExternalForm(), 40));
+        gameOverText.setFill(Color.WHITE);
+
+        // Clear previous text if it exists and add new text at the beginning
+        gameOverMenu.getChildren().removeIf(node -> node instanceof Text);
+        gameOverMenu.getChildren().add(0, gameOverText);
+
+        root.getChildren().add(gameOverMenu);
     }
 
     private void setupInputHandlers() {
@@ -302,7 +312,13 @@ public class Game extends Application {
         // Check for win condition
         if (score >= 200 && !gameWon) {
             gameWon = true;
-            showGameWonScreen();
+            handleGameOver();
+            return;
+        }
+        // Check for death condition
+        if (player.isDead() && player.isDeathAnimationComplete()) {
+            gameWon = false;
+            handleGameOver();
             return;
         }
 
