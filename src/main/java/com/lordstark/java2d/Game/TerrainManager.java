@@ -61,7 +61,7 @@ public class TerrainManager {
     private List<Image> loadImages(String type) {
         List<Image> images = new ArrayList<>();
         for (int i = 1; i <= 6; i++) {
-            images.add(new Image("file:src/main/resources/" + type + "/" + i + ".png"));
+            images.add(new Image("file:src/main/resources/TerrainObj/" + type + "/" + i + ".png"));
         }
         return images;
     }
