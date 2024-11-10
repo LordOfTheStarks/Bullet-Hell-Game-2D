@@ -26,7 +26,19 @@ tasks.withType(JavaCompile) {
 
 application {
   mainModule = 'com.lordstark.java2d'
-  mainClass = 'com.lordstark.java2d.HelloApplication'
+  mainClass = 'com.lordstark.java2d.MainApp'
+}
+
+jar {
+  manifest {
+    attributes(
+            'Main-Class': application.mainClass // Sets main class in the JAR manifest
+    )
+  }
+  from {
+    configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+  }
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 javafx {
