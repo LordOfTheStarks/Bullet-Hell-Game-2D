@@ -40,9 +40,9 @@ public class Player {
     public Player(double x, double y) {
         this.x = x;
         this.y = y;
-        this.sideSpriteSheet = new Image("file:src/main/resources/Player/Player_Side_Sheet.png");
-        this.frontSpriteSheet = new Image("file:src/main/resources/Player/Player_Front_Sheet.png");
-        this.backSpriteSheet = new Image("file:src/main/resources/Player/Player_Back_Sheet.png");
+        this.sideSpriteSheet = new Image(getClass().getResourceAsStream("/Player/Player_Side_Sheet.png"));
+        this.frontSpriteSheet = new Image(getClass().getResourceAsStream("/Player/Player_Front_Sheet.png"));
+        this.backSpriteSheet = new Image(getClass().getResourceAsStream("/Player/Player_Back_Sheet.png"));
 
         this.spriteSheet = sideSpriteSheet;
         this.spriteAnimation = new SpriteAnimation(48, 44, 12);

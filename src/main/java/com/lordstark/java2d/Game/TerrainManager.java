@@ -58,8 +58,8 @@ public class TerrainManager {
         this.flowers = new ArrayList<>();
         this.bushes = new ArrayList<>();
         this.trees = new ArrayList<>();
-        this.treeImage = new Image("file:src/main/resources/Trees/Tree1.png");
-        this.treeShadowImage = new Image("file:src/main/resources/Shadows/6.png");
+        this.treeImage = new Image(getClass().getResourceAsStream("/Trees/Tree1.png"));
+        this.treeShadowImage = new Image(getClass().getResourceAsStream("/Shadows/6.png"));
 
         loadMainTile();
         initializeTrees();
@@ -69,7 +69,7 @@ public class TerrainManager {
     private List<Image> loadImages(String type) {
         List<Image> images = new ArrayList<>();
         for (int i = 1; i <= 6; i++) {
-            images.add(new Image("file:src/main/resources/TerrainObj/" + type + "/" + i + ".png"));
+            images.add(new Image(getClass().getResourceAsStream("/TerrainObj/" + type + "/" + i + ".png")));
         }
         return images;
     }
@@ -202,25 +202,25 @@ public class TerrainManager {
     }
 
     private void loadMainTile() {
-        mainTile = new Image("file:src/main/resources/tiles/1.png");
+        mainTile = new Image(getClass().getResourceAsStream("/tiles/1.png"));
     }
     private List<TerrainObject> initializeStaticTents() {
         List<TerrainObject> tents = new ArrayList<>();
-        tents.add(new TerrainObject(-600, -600, new Image("file:src/main/resources/Tents/1.png")));
-        tents.add(new TerrainObject(600, -600, new Image("file:src/main/resources/Tents/2.png")));
-        tents.add(new TerrainObject(-600, 540, new Image("file:src/main/resources/Tents/3.png")));
-        tents.add(new TerrainObject(600, 540, new Image("file:src/main/resources/Tents/4.png")));
+        tents.add(new TerrainObject(-600, -600, new Image(getClass().getResourceAsStream("/Tents/1.png"))));
+        tents.add(new TerrainObject(600, -600, new Image(getClass().getResourceAsStream("/Tents/2.png"))));
+        tents.add(new TerrainObject(-600, 540, new Image(getClass().getResourceAsStream("/Tents/3.png"))));
+        tents.add(new TerrainObject(600, 540, new Image(getClass().getResourceAsStream("/Tents/4.png"))));
 
         // Add more houses here if needed, ensuring they don’t overlap in position
         return tents;
     }
     private List<TerrainObject> initializeStaticDecors() {
         List<TerrainObject> decors = new ArrayList<>();
-        decors.add(new TerrainObject(-40, -70, new Image("file:src/main/resources/Decor/Lamp1.png")));
-        decors.add(new TerrainObject(150, -70, new Image("file:src/main/resources/Decor/Lamp2.png")));
-        decors.add(new TerrainObject(-40, 80, new Image("file:src/main/resources/Decor/Lamp3.png")));
-        decors.add(new TerrainObject(150, 90, new Image("file:src/main/resources/Decor/Lamp4.png")));
-        decors.add(new TerrainObject(55, 94, new Image("file:src/main/resources/Decor/Land5.png")));
+        decors.add(new TerrainObject(-40, -70, new Image(getClass().getResourceAsStream("/Decor/Lamp1.png"))));
+        decors.add(new TerrainObject(150, -70, new Image(getClass().getResourceAsStream("/Decor/Lamp2.png"))));
+        decors.add(new TerrainObject(-40, 80, new Image(getClass().getResourceAsStream("/Decor/Lamp3.png"))));
+        decors.add(new TerrainObject(150, 90, new Image(getClass().getResourceAsStream("/Decor/Lamp4.png"))));
+        decors.add(new TerrainObject(55, 94, new Image(getClass().getResourceAsStream("/Decor/Land5.png"))));
 
         // Add more houses here if needed, ensuring they don’t overlap in position
         return decors;
@@ -231,10 +231,10 @@ public class TerrainManager {
         List<TerrainObject> houses = new ArrayList<>();
 
         // Define unique positions and images for each house
-        houses.add(new TerrainObject(-180, -180, new Image("file:src/main/resources/Houses/1.png")));
-        houses.add(new TerrainObject(180, -180, new Image("file:src/main/resources/Houses/2.png")));
-        houses.add(new TerrainObject(-180, 120, new Image("file:src/main/resources/Houses/3.png")));
-        houses.add(new TerrainObject(180, 120, new Image("file:src/main/resources/Houses/4.png")));
+        houses.add(new TerrainObject(-180, -180, new Image(getClass().getResourceAsStream("/Houses/1.png"))));
+        houses.add(new TerrainObject(180, -180, new Image(getClass().getResourceAsStream("/Houses/2.png"))));
+        houses.add(new TerrainObject(-180, 120, new Image(getClass().getResourceAsStream("/Houses/3.png"))));
+        houses.add(new TerrainObject(180, 120, new Image(getClass().getResourceAsStream("/Houses/4.png"))));
 
         // Add more houses here if needed, ensuring they don’t overlap in position
         return houses;

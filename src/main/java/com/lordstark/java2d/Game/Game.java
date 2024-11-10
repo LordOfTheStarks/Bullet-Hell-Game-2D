@@ -94,7 +94,7 @@ public class Game extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        // Initialize menus but don't add them yet
+        // Initialize menus but it don't add them yet
         createGameOverMenu();
         createPauseMenu();
     }
@@ -171,13 +171,13 @@ public class Game extends Application {
     private void handleGameOver() {
         gameLoop.stop();
 
-        // Create the text based on current game state
+        // Create the text depending on the situation
         Text gameOverText = new Text(gameWon ? "You Won" : "You Lost");
         gameOverText.setFont(Font.loadFont(Objects.requireNonNull(
                 MainMenu.class.getResource("/joystix-monospace.otf")).toExternalForm(), 40));
         gameOverText.setFill(Color.WHITE);
 
-        // Clear previous text if it exists and add new text at the beginning
+        // Clears previous text if it exists
         gameOverMenu.getChildren().removeIf(node -> node instanceof Text);
         gameOverMenu.getChildren().add(0, gameOverText);
 
@@ -232,13 +232,13 @@ public class Game extends Application {
         canvas.setWidth(width);
         canvas.setHeight(height);
 
-        // Update pause menu size if it exists
+        // Updates pause menu size
         if (pauseMenu != null) {
             pauseMenu.setPrefWidth(width);
             pauseMenu.setPrefHeight(height);
         }
 
-        // Update game over menu size if it exists
+        // Updates game over menu size
         if (gameOverMenu != null) {
             gameOverMenu.setPrefWidth(width);
             gameOverMenu.setPrefHeight(height);
@@ -290,12 +290,12 @@ public class Game extends Application {
                 while (true) {
                     if (tents.isEmpty()) break;
 
-                    // Get the next tent in sequence
+                    // Get the next tent in the sequence (clockwise and then retunrs)
                     TerrainObject tent = tents.get(currentTentIndex);
                     double x = tent.x();
                     double y = tent.y();
 
-                    // Add small random offset to prevent enemies from spawning at exact same spot
+                    // Adds small offset to prevent enemies from spawning at the same spot
                     double offsetX = (Math.random() - 0.5) * 20; // +/- 10 pixels
                     double offsetY = (Math.random() - 0.5) * 20;
 
@@ -308,7 +308,7 @@ public class Game extends Application {
                     currentTentIndex = (currentTentIndex + 1) % tents.size();
 
                     // Wait before spawning the next enemy
-                    Thread.sleep(2000);
+                    Thread.sleep(2000); // This can be changed according to the dev
                 }
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
