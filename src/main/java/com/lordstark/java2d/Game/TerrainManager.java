@@ -20,9 +20,11 @@ public class TerrainManager {
     private final List<Image> grassImages;
     private final List<Image> rockImages;
     private final List<Image> flowerImages;
+    private final List<Image> bushImages;
     private Image mainTile; // The main tile image to use as the base layer
     private final List<TerrainObject> staticHouses; // Fixed list of houses
     private final List<TerrainObject> staticTents;
+    private final List<TerrainObject> staticDecors;
 
     private final List<TreeObject> trees; // New list for trees
     private final Image treeImage;
@@ -31,6 +33,7 @@ public class TerrainManager {
     private final List<TerrainObject> grasses;
     private final List<TerrainObject> rocks;
     private final List<TerrainObject> flowers;
+    private final List<TerrainObject> bushes;
 
     private static final int TILE_SIZE = 30;
     private static final int RADIUS = 10; // Radius around the player for tile generation
@@ -43,12 +46,15 @@ public class TerrainManager {
         this.grassImages = loadImages("Grass");
         this.rockImages = loadImages("Rocks");
         this.flowerImages = loadImages("Flowers");
+        this.bushImages = loadImages("Bushes");
         this.staticHouses = initializeStaticHouses(); // Initialize static houses
         this.staticTents = initializeStaticTents();
+        this.staticDecors = initializeStaticDecors();
 
         this.grasses = new ArrayList<>();
         this.rocks = new ArrayList<>();
         this.flowers = new ArrayList<>();
+        this.bushes = new ArrayList<>();
         this.trees = new ArrayList<>();
         this.treeImage = new Image("file:src/main/resources/Trees/Tree1.png");
         this.treeShadowImage = new Image("file:src/main/resources/Shadows/6.png");
@@ -107,8 +113,9 @@ public class TerrainManager {
         Random random = new Random();
 
         int maxGrass = 1000; // Adjust the number as needed
-        int maxRocks = 1000; // Adjust the number as needed
+        int maxRocks = 500; // Adjust the number as needed
         int maxFlowers = 1000;
+        int maxBushes = 10;
 
         // Place grasses randomly within world bounds
         for (int i = 0; i < maxGrass; i++) {
@@ -116,6 +123,13 @@ public class TerrainManager {
             double y = random.nextDouble() * WORLD_HEIGHT - WORLD_HEIGHT / 2.0;
             Image grassImage = randomImage(grassImages);
             grasses.add(new TerrainObject(x, y, grassImage));
+        }
+
+        for (int i = 0; i < maxBushes; i++) {
+            double x = random.nextDouble() * WORLD_WIDTH - WORLD_WIDTH / 2.0;
+            double y = random.nextDouble() * WORLD_HEIGHT - WORLD_HEIGHT / 2.0;
+            Image bushImage = randomImage(bushImages);
+            bushes.add(new TerrainObject(x, y, bushImage));
         }
 
         // Place rocks randomly within world bounds
@@ -197,6 +211,17 @@ public class TerrainManager {
 
         // Add more houses here if needed, ensuring they don’t overlap in position
         return tents;
+    }
+    private List<TerrainObject> initializeStaticDecors() {
+        List<TerrainObject> decors = new ArrayList<>();
+        decors.add(new TerrainObject(-40, -70, new Image("file:src/main/resources/Decor/Lamp1.png")));
+        decors.add(new TerrainObject(150, -70, new Image("file:src/main/resources/Decor/Lamp2.png")));
+        decors.add(new TerrainObject(-40, 80, new Image("file:src/main/resources/Decor/Lamp3.png")));
+        decors.add(new TerrainObject(150, 90, new Image("file:src/main/resources/Decor/Lamp4.png")));
+        decors.add(new TerrainObject(55, 94, new Image("file:src/main/resources/Decor/Land5.png")));
+
+        // Add more houses here if needed, ensuring they don’t overlap in position
+        return decors;
     }
 
     // Create fixed house objects with unique positions and images
@@ -280,6 +305,13 @@ public class TerrainManager {
                     grass.y() - camera.getOffsetY()
             );
         }
+        for (TerrainObject bush : bushes) {
+            graphicsContext.drawImage(
+                    bush.image(),
+                    bush.x() - camera.getOffsetX(),
+                    bush.y() - camera.getOffsetY()
+            );
+        }
 
         // Render pre-generated rocks
         for (TerrainObject rock : rocks) {
@@ -312,6 +344,14 @@ public class TerrainManager {
                     tent.image(),
                     tent.x() - camera.getOffsetX(),
                     tent.y() - camera.getOffsetY()
+            );
+        }
+        // Render static houses with fixed positions
+        for (TerrainObject decor : staticDecors) {
+            graphicsContext.drawImage(
+                    decor.image(),
+                    decor.x() - camera.getOffsetX(),
+                    decor.y() - camera.getOffsetY()
             );
         }
         // First render all shadows
