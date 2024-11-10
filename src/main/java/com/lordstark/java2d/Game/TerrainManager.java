@@ -9,8 +9,8 @@ import java.util.*;
 public class TerrainManager {
 
     // In TerrainManager.java, add these constants at the top of the class:
-    public static final int WORLD_WIDTH = 5000;  // Adjust these values as needed
-    public static final int WORLD_HEIGHT = 5000;
+    public static final int WORLD_WIDTH = 3000;  // Adjust these values as needed
+    public static final int WORLD_HEIGHT = 3000;
     private static final int SPAWN_SAFE_ZONE = 200; // No trees within this radius of spawn point
     private static final int HOUSE_SAFE_ZONE = 150; // No trees within this radius of houses
     private static final int TENT_SAFE_ZONE = 150; // No trees within this radius of houses
@@ -27,6 +27,9 @@ public class TerrainManager {
     private final Image treeImage;
     private final Image treeShadowImage;
 
+    private final List<TerrainObject> grasses;
+    private final List<TerrainObject> rocks;
+
     private static final int TILE_SIZE = 30;
     private static final int RADIUS = 10; // Radius around the player for tile generation
     private static final int ROCK_PROBABILITY = 10; // 10% chance of a rock
@@ -40,11 +43,15 @@ public class TerrainManager {
         this.staticHouses = initializeStaticHouses(); // Initialize static houses
         this.staticTents = initializeStaticTents();
 
+        this.grasses = new ArrayList<>();
+        this.rocks = new ArrayList<>();
         this.trees = new ArrayList<>();
         this.treeImage = new Image("file:src/main/resources/Trees/Tree1.png");
         this.treeShadowImage = new Image("file:src/main/resources/Shadows/6.png");
+
         loadMainTile();
         initializeTrees();
+        initializeGrassAndRocks();
     }
 
     private List<Image> loadImages(String type) {
@@ -90,6 +97,28 @@ public class TerrainManager {
             double collisionY = y + treeHeight - collisionHeight;
 
             return new double[]{collisionX, collisionY, collisionWidth, collisionHeight};
+        }
+    }
+    private void initializeGrassAndRocks() {
+        Random random = new Random();
+
+        int maxGrass = 1000; // Adjust the number as needed
+        int maxRocks = 1000; // Adjust the number as needed
+
+        // Place grasses randomly within world bounds
+        for (int i = 0; i < maxGrass; i++) {
+            double x = random.nextDouble() * WORLD_WIDTH - WORLD_WIDTH / 2.0;
+            double y = random.nextDouble() * WORLD_HEIGHT - WORLD_HEIGHT / 2.0;
+            Image grassImage = randomImage(grassImages);
+            grasses.add(new TerrainObject(x, y, grassImage));
+        }
+
+        // Place rocks randomly within world bounds
+        for (int i = 0; i < maxRocks; i++) {
+            double x = random.nextDouble() * WORLD_WIDTH - WORLD_WIDTH / 2.0;
+            double y = random.nextDouble() * WORLD_HEIGHT - WORLD_HEIGHT / 2.0;
+            Image rockImage = randomImage(rockImages);
+            rocks.add(new TerrainObject(x, y, rockImage));
         }
     }
     private void initializeTrees() {
@@ -231,15 +260,22 @@ public class TerrainManager {
             }
         }
 
-        // Render dynamically generated terrain objects (grass, rocks, etc.)
-        for (TerrainObject obj : terrainMap.values()) {
-            if (obj.image() != null) {
-                graphicsContext.drawImage(
-                        obj.image(),
-                        obj.x() - camera.getOffsetX(),
-                        obj.y() - camera.getOffsetY()
-                );
-            }
+        // Render pre-generated grasses
+        for (TerrainObject grass : grasses) {
+            graphicsContext.drawImage(
+                    grass.image(),
+                    grass.x() - camera.getOffsetX(),
+                    grass.y() - camera.getOffsetY()
+            );
+        }
+
+        // Render pre-generated rocks
+        for (TerrainObject rock : rocks) {
+            graphicsContext.drawImage(
+                    rock.image(),
+                    rock.x() - camera.getOffsetX(),
+                    rock.y() - camera.getOffsetY()
+            );
         }
 
         // Render static houses with fixed positions
